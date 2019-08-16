@@ -43,6 +43,7 @@ model_id = "1"
 num_epochs = 1000
 batch_size = 3
 learning_rate = 0.0001
+checkpoint_save_stride = 10
 
 network = DeepLabV3(model_id, project_dir=default_path).cuda()
 
@@ -170,5 +171,6 @@ for epoch in range(start_epoch, num_epochs):
     plt.close(1)
 
     # save the model weights to disk:
-    checkpoint_path = network.checkpoints_dir + "/model_" + model_id +"_epoch_" + str(epoch+1) + ".pth"
-    torch.save(network.state_dict(), checkpoint_path)
+    if epoch%checkpoint_save_stride == 0:
+        checkpoint_path = network.checkpoints_dir + "/model_" + model_id +"_epoch_" + str(epoch+1) + ".pth"
+        torch.save(network.state_dict(), checkpoint_path)
