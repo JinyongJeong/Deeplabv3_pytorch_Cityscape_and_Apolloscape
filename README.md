@@ -1,3 +1,10 @@
+## This repo is not complete for Apolloscape dataset
+
+# Fix mirror issue
+
+
+## Original repo: https://github.com/fregu856/deeplabv3
+
 # deeplabv3
 
 PyTorch implementation of [DeepLabV3](https://arxiv.org/abs/1706.05587), trained on the [Cityscapes](https://www.cityscapes-dataset.com/) dataset.
