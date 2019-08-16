@@ -27,6 +27,15 @@ import matplotlib.pyplot as plt
 import cv2
 
 import time
+import glob
+
+def getEpoch(checkpoint_name):
+    filename_w_ext = os.path.basename(checkpoint_name)
+    filename, file_extension = os.path.splitext(filename_w_ext)
+    filenames = filename.split("_")
+    return filenames[3]
+
+
 
 # NOTE! NOTE! change this to not overwrite all log data when you train the model:
 model_id = "1"
@@ -36,6 +45,21 @@ batch_size = 3
 learning_rate = 0.0001
 
 network = DeepLabV3(model_id, project_dir=default_path).cuda()
+
+#check last checkpoint
+#checkpoint_path = network.checkpoints_dir + "/model_" + model_id +"_epoch_" + str(epoch+1) + ".pth"
+data_list = glob.glob(os.path.join(network.checkpoints_dir,'model_'+model_id+'_*.pth'))
+
+#find latest checkpoint
+start_epoch = 0
+for name in list(data_list):
+    if start_epoch < int(getEpoch(name)):
+        start_epoch = int(getEpoch(name))
+if start_epoch != 0:
+    network.load_state_dict(torch.load(os.path.join(network.checkpoints_dir,"model_" + model_id +"_epoch_" + str(start_epoch) + ".pth")))
+    print("Recorver check point of epoch: " + str(start_epoch)) 
+
+
 
 train_dataset = DatasetTrain(cityscapes_data_path=os.path.join(default_path,'data/cityscapes'),
                              cityscapes_meta_path=os.path.join(default_path,'data/cityscapes/meta'))
@@ -67,7 +91,7 @@ loss_fn = nn.CrossEntropyLoss(weight=class_weights)
 
 epoch_losses_train = []
 epoch_losses_val = []
-for epoch in range(num_epochs):
+for epoch in range(start_epoch, num_epochs):
     print ("###########################")
     print ("######## NEW EPOCH ########")
     print ("###########################")
