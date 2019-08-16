@@ -11,6 +11,8 @@ from deeplabv3 import DeepLabV3
 
 sys.path.append(os.path.join(default_path,'utils'))
 from utils import add_weight_decay
+from utils import label_img_to_color
+
 
 import torch
 import torch.utils.data
@@ -48,7 +50,6 @@ checkpoint_save_stride = 10
 network = DeepLabV3(model_id, project_dir=default_path).cuda()
 
 #check last checkpoint
-#checkpoint_path = network.checkpoints_dir + "/model_" + model_id +"_epoch_" + str(epoch+1) + ".pth"
 data_list = glob.glob(os.path.join(network.checkpoints_dir,'model_'+model_id+'_*.pth'))
 
 #find latest checkpoint
@@ -110,7 +111,7 @@ for epoch in range(start_epoch, num_epochs):
         label_imgs = Variable(label_imgs.type(torch.LongTensor)).cuda() # (shape: (batch_size, img_h, img_w))
 
         outputs = network(imgs) # (shape: (batch_size, num_classes, img_h, img_w))
-
+        
         # compute the loss:
         loss = loss_fn(outputs, label_imgs)
         loss_value = loss.data.cpu().numpy()
@@ -121,7 +122,6 @@ for epoch in range(start_epoch, num_epochs):
         loss.backward() # (compute gradients)
         optimizer.step() # (perform optimization step)
 
-        #print (time.time() - current_time)
 
     epoch_loss = np.mean(batch_losses)
     epoch_losses_train.append(epoch_loss)
@@ -136,7 +136,6 @@ for epoch in range(start_epoch, num_epochs):
     plt.title("train loss per epoch")
     plt.savefig("%s/epoch_losses_train.png" % network.model_dir)
     plt.close(1)
-
     print ("####")
 
     ############################################################################
@@ -155,6 +154,31 @@ for epoch in range(start_epoch, num_epochs):
             loss = loss_fn(outputs, label_imgs)
             loss_value = loss.data.cpu().numpy()
             batch_losses.append(loss_value)
+
+            #print (time.time() - current_time)
+            outputs = outputs.data.cpu().numpy() # (shape: (batch_size, num_classes, img_h, img_w))
+            pred_label_imgs = np.argmax(outputs, axis=1) # (shape: (batch_size, img_h, img_w))
+            pred_label_imgs = pred_label_imgs.astype(np.uint8)
+
+            for i in range(pred_label_imgs.shape[0]):
+                if i == 0:
+                    pred_label_img = pred_label_imgs[i] # (shape: (img_h, img_w))
+                    img_id = img_ids[i]
+                    img = imgs[i] # (shape: (3, img_h, img_w))
+
+                    img = img.data.cpu().numpy()
+                    img = np.transpose(img, (1, 2, 0)) # (shape: (img_h, img_w, 3))
+                    img = img*np.array([0.229, 0.224, 0.225])
+                    img = img + np.array([0.485, 0.456, 0.406])
+                    img = img*255.0
+                    img = img.astype(np.uint8)
+
+                    pred_label_img_color = label_img_to_color(pred_label_img)
+                    overlayed_img = 0.35*img + 0.65*pred_label_img_color
+                    overlayed_img = overlayed_img.astype(np.uint8)
+
+                    cv2.imwrite(network.model_dir + "/test.png", overlayed_img)
+
 
     epoch_loss = np.mean(batch_losses)
     epoch_losses_val.append(epoch_loss)

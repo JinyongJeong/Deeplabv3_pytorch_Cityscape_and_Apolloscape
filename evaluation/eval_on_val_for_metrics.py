@@ -27,6 +27,15 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import cv2
+import glob 
+
+def getEpoch(checkpoint_name):
+    filename_w_ext = os.path.basename(checkpoint_name)
+    filename, file_extension = os.path.splitext(filename_w_ext)
+    filenames = filename.split("_")
+    return filenames[3]
+
+
 
 trainId_to_id = {
     0: 7,
@@ -53,9 +62,23 @@ trainId_to_id = {
 trainId_to_id_map_func = np.vectorize(trainId_to_id.get)
 
 batch_size = 2
+model_id = 1
 
 network = DeepLabV3("eval_val_for_metrics", project_dir=default_path).cuda()
-network.load_state_dict(torch.load(os.path.join(default_path,'pretrained_models/model_13_2_2_2_epoch_580.pth')))
+#network.load_state_dict(torch.load(os.path.join(default_path,'pretrained_models/model_13_2_2_2_epoch_580.pth')))
+#check last checkpoint
+data_list = glob.glob(os.path.join(default_path,'training_logs/model_' + str(model_id) + '/checkpoints/model_'+ str(model_id)+ '_*.pth'))
+
+#find latest checkpoint
+latest_epoch = 0
+for name in list(data_list):
+    if latest_epoch < int(getEpoch(name)):
+        latest_epoch = int(getEpoch(name))
+if latest_epoch != 0:
+    network.load_state_dict(torch.load(os.path.join(default_path,'training_logs/model_' + str(model_id) + '/checkpoints/model_' + str(model_id) + '_epoch_' + str(latest_epoch) + '.pth')))
+    print("Recorver check point of epoch: " + str(latest_epoch)) 
+
+
 
 val_dataset = DatasetVal(cityscapes_data_path=os.path.join(default_path,'data/cityscapes'),
                          cityscapes_meta_path=os.path.join(default_path,'data/cityscapes/meta'))
