@@ -189,8 +189,6 @@ for train_data_path in list(train_data_paths):
         step = step + 1
         if step % 10 == 0:
             print("Compute class weight: " + str(step) + "/" + str(round(total_num_images * (1-eval_data_rate))))
-        if step > 100:
-            break
         label_img = cv2.imread(image, -1)
         for trainId in range(num_classes):
             trainId_mask = np.equal(label_img, trainId)
