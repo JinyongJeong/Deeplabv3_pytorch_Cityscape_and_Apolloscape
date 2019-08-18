@@ -117,7 +117,8 @@ data_paths = glob.glob(data_path)
 color_map = np.ndarray(shape=(256*256*256), dtype='int32')
 color_map[:] = 0
 for label in labels:
-    rgb = label.color[0] * 65536 + label.color[1] * 256 + label.color[2]
+    #rgb = label.color[0] * 65536 + label.color[1] * 256 + label.color[2]
+    rgb = label.color[2] * 65536 + label.color[1] * 256 + label.color[0]
     color_map[rgb] = label.categoryId
 
 ################################################################################
@@ -186,8 +187,10 @@ for train_data_path in list(train_data_paths):
     images = glob.glob(image_path)
     for image in list(images):
         step = step + 1
-        if step % 100 == 0:
-            print(step)
+        if step % 10 == 0:
+            print("Compute class weight: " + str(step) + "/" + str(round(total_num_images * (1-eval_data_rate))))
+        if step > 100:
+            break
         label_img = cv2.imread(image, -1)
         for trainId in range(num_classes):
             trainId_mask = np.equal(label_img, trainId)
