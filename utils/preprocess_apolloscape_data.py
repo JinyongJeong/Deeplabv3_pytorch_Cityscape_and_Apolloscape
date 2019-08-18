@@ -4,6 +4,7 @@ import numpy as np
 import cv2
 import os
 import glob
+import random
 from collections import namedtuple
 default_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -84,8 +85,8 @@ labels = [
     Label(  'r_wy_np' , 227 ,    33 , 'no parking' ,  10 ,      False ,      False , (178, 132, 190) ),
     Label( 'vom_wy_n' , 223 ,    34 ,     'others' ,  11 ,      False ,       True , (128, 128,  64) ),
     Label(   'om_n_n' , 250 ,    35 ,     'others' ,  11 ,      False ,      False , (102,   0, 204) ),
-    Label(    'noise' , 249 ,   255 ,    'ignored' , 255 ,      False ,       True , (  0, 153, 153) ),
-    Label(  'ignored' , 255 ,   255 ,    'ignored' , 255 ,      False ,       True , (255, 255, 255) ),
+    Label(    'noise' , 249 ,   255 ,    'ignored' ,  12 ,      False ,       True , (  0, 153, 153) ),
+    Label(  'ignored' , 255 ,   255 ,    'ignored' ,  12 ,      False ,       True , (255, 255, 255) ),
 ]
 
 # create a function which maps id to trainId:
@@ -106,32 +107,35 @@ for label in labels:
 
 id_to_trainId = {label.id: label.trainId for label in labels}
 id_to_trainId_map_func = np.vectorize(id_to_trainId.get)
-color_to_trainId = {label.color: label.trainId for label in labels}
-color_to_trainId_map_func = np.vectorize(color_to_trainId.get)
-
-def color2trainid(color):
-    for label in labels:
-        if color == label.color:
-            return label.trainId
-    return 0
 
 apolloscape_data_path = os.path.join(default_path,'./../data/apolloscapes')
 data_path = os.path.join(apolloscape_data_path,'Labels_*/Label/Record*/Camera 5')
 data_paths = glob.glob(data_path)
 
 #make color map for fast conversion
+#In our application, we use categoryId for trainID
 color_map = np.ndarray(shape=(256*256*256), dtype='int32')
 color_map[:] = 0
 for label in labels:
     rgb = label.color[0] * 65536 + label.color[1] * 256 + label.color[2]
-    color_map[rgb] = label.trainId
+    color_map[rgb] = label.categoryId
 
 ################################################################################
 # convert all labels to label imgs with trainId pixel values (and save to disk):
 ################################################################################
 
+eval_data_rate = 0.1
+image_overwrite = False
+
 total_num_images = 0
 #count total image number
+random.shuffle(data_paths)
+train_data_paths = data_paths[0:round(len(data_paths)*(1-eval_data_rate))]
+eval_data_paths = data_paths[round(len(data_paths)*(1-eval_data_rate)) : len(data_paths)]
+print("Number of training path: ", str(len(train_data_paths)))
+print("Number of evaluation path: ", str(len(eval_data_paths)))
+print("Number of total path: ", str(len(data_paths)))
+
 for path in list(data_paths):
     image_path = os.path.join(path, '*.png')
     images = glob.glob(image_path)
@@ -151,60 +155,65 @@ for path in list(data_paths):
         image_index = image_index + 1
         save_filename = os.path.basename(image)
         save_file = os.path.join(save_path, save_filename)
-        if os.path.exists(save_file):
-            print("Converted file exist " + str(image_index) +"/" + str(total_num_images))
-            continue
+        if not image_overwrite:
+            if os.path.exists(save_file):
+                print("Converted file exist " + str(image_index) +"/" + str(total_num_images))
+                continue
         print("processing..." + str(image_index) + "/" + str(total_num_images))
         label_img = cv2.imread(image, cv2.IMREAD_COLOR)
-        #h, w, d = label_img.shape
-        #TrainID_img  = np.zeros((h,w,1), np.uint8)
-        #for i in range(h):
-        #    for j in range(w):
-        #        train_id = color2trainid((label_img.item(i,j,0),label_img.item(i,j,1),label_img.item(i,j,2)))
-        #        TrainID_img.itemset((i,j,0), train_id)
         TrainId_img = label_img.dot(np.array([65536, 256, 1], dtype='int32'))
         TrainId_img = color_map[TrainId_img]
 
         cv2.imwrite(save_file, TrainId_img);
         print(os.path.join(save_path,save_filename))
        
-train_label_img_paths = []
 
 ################################################################################
 # compute the class weigths:
 ################################################################################
 print ("computing class weights")
 
-num_classes = 20
+num_classes = 13
 
 trainId_to_count = {}
 for trainId in range(num_classes):
     trainId_to_count[trainId] = 0
 
-# get the total number of pixels in all train label_imgs that are of each object class:
-for step, label_img_path in enumerate(train_label_img_paths):
-    if step % 100 == 0:
-        print (step)
+step = 0
+for train_data_path in list(train_data_paths):
+    train_data_path = train_data_path.replace("Labels_","Trainid_")
+    image_path = os.path.join(train_data_path, '*.png')
+    images = glob.glob(image_path)
+    for image in list(images):
+        step = step + 1
+        if step % 100 == 0:
+            print(step)
+        label_img = cv2.imread(image, -1)
+        for trainId in range(num_classes):
+            trainId_mask = np.equal(label_img, trainId)
+            trainId_count = np.sum(trainId_mask)
 
-    label_img = cv2.imread(label_img_path, -1)
-
-    for trainId in range(num_classes):
-        # count how many pixels in label_img which are of object class trainId:
-        trainId_mask = np.equal(label_img, trainId)
-        trainId_count = np.sum(trainId_mask)
-
-        # add to the total count:
-        trainId_to_count[trainId] += trainId_count
+            # add to the total count:
+            trainId_to_count[trainId] += trainId_count
 
 # compute the class weights according to the ENet paper:
 class_weights = []
 total_count = sum(trainId_to_count.values())
+print("total count: "+ str(total_count))
 for trainId, count in trainId_to_count.items():
     trainId_prob = float(count)/float(total_count)
     trainId_weight = 1/np.log(1.02 + trainId_prob)
     class_weights.append(trainId_weight)
+    print("trainId: " + str(trainId) + " count: " + str(count) + " prob: " + str(trainId_prob) + " weight: " + str(trainId_weight))
 
 print (class_weights)
 
-with open(cityscapes_meta_path + "/class_weights.pkl", "wb") as file:
+with open(apolloscape_data_path + "/class_weights.pkl", "wb") as file:
     pickle.dump(class_weights, file, protocol=2) # (protocol=2 is needed to be able to open this file with python2)
+
+# Save train & eval path
+with open(apolloscape_data_path + "/train_data_path.pkl","wb") as file:
+    pickle.dump(train_data_paths, file)
+with open(apolloscape_data_path + "/eval_data_path.pkl","wb") as file:
+    pickle.dump(eval_data_paths, file)
+
