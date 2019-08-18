@@ -1,10 +1,11 @@
 # camera-ready
-
 import pickle
 import numpy as np
 import cv2
 import os
+import glob
 from collections import namedtuple
+default_path = os.path.dirname(os.path.abspath(__file__))
 
 # (NOTE! this is taken from the official Cityscapes scripts:)
 Label = namedtuple( 'Label' , [
@@ -88,27 +89,85 @@ labels = [
 ]
 
 # create a function which maps id to trainId:
+# name to label object
+name_to_label      = { label.name    : label for label in labels           }
+# id to label object
+id_to_label        = { label.id      : label for label in labels           }
+# trainId to label object
+trainId_to_label   = { label.trainId : label for label in reversed(labels) }
+# category to list of label objects
+category_to_labels = {}
+for label in labels:
+    category = label.category
+    if category in category_to_labels:
+        category_to_labels[category].append(label)
+    else:
+        category_to_labels[category] = [label]
+
 id_to_trainId = {label.id: label.trainId for label in labels}
 id_to_trainId_map_func = np.vectorize(id_to_trainId.get)
+color_to_trainId = {label.color: label.trainId for label in labels}
+color_to_trainId_map_func = np.vectorize(color_to_trainId.get)
 
-train_dirs = ["jena/", "zurich/", "weimar/", "ulm/", "tubingen/", "stuttgart/",
-              "strasbourg/", "monchengladbach/", "krefeld/", "hanover/",
-              "hamburg/", "erfurt/", "dusseldorf/", "darmstadt/", "cologne/",
-              "bremen/", "bochum/", "aachen/"]
-val_dirs = ["frankfurt/", "munster/", "lindau/"]
-test_dirs = ["berlin", "bielefeld", "bonn", "leverkusen", "mainz", "munich"]
+def color2trainid(color):
+    for label in labels:
+        if color == label.color:
+            return label.trainId
+    return 0
 
-cityscapes_data_path = "./../data/cityscapes"
-cityscapes_meta_path = "./../data/cityscapes/meta"
+apolloscape_data_path = os.path.join(default_path,'./../data/apolloscapes')
+data_path = os.path.join(apolloscape_data_path,'Labels_*/Label/Record*/Camera 5')
+data_paths = glob.glob(data_path)
 
-if not os.path.exists(cityscapes_meta_path):
-    os.makedirs(cityscapes_meta_path)
-if not os.path.exists(cityscapes_meta_path + "/label_imgs"):
-    os.makedirs(cityscapes_meta_path + "/label_imgs")
+#make color map for fast conversion
+color_map = np.ndarray(shape=(256*256*256), dtype='int32')
+color_map[:] = 0
+for label in labels:
+    rgb = label.color[0] * 65536 + label.color[1] * 256 + label.color[2]
+    color_map[rgb] = label.trainId
 
 ################################################################################
 # convert all labels to label imgs with trainId pixel values (and save to disk):
 ################################################################################
+
+total_num_images = 0
+#count total image number
+for path in list(data_paths):
+    image_path = os.path.join(path, '*.png')
+    images = glob.glob(image_path)
+    total_num_images = total_num_images + len(images)
+    
+image_index = 0
+for path in list(data_paths):
+    save_path = path.replace("Labels_", "Trainid_")
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    
+    image_path = os.path.join(path, '*.png')
+    images = glob.glob(image_path)
+    print("Converting image path: ", path)
+    print("Number of images: ", len(images))
+    for image in list(images):
+        image_index = image_index + 1
+        save_filename = os.path.basename(image)
+        save_file = os.path.join(save_path, save_filename)
+        if os.path.exists(save_file):
+            print("Converted file exist " + str(image_index) +"/" + str(total_num_images))
+            continue
+        print("processing..." + str(image_index) + "/" + str(total_num_images))
+        label_img = cv2.imread(image, cv2.IMREAD_COLOR)
+        #h, w, d = label_img.shape
+        #TrainID_img  = np.zeros((h,w,1), np.uint8)
+        #for i in range(h):
+        #    for j in range(w):
+        #        train_id = color2trainid((label_img.item(i,j,0),label_img.item(i,j,1),label_img.item(i,j,2)))
+        #        TrainID_img.itemset((i,j,0), train_id)
+        TrainId_img = label_img.dot(np.array([65536, 256, 1], dtype='int32'))
+        TrainId_img = color_map[TrainId_img]
+
+        cv2.imwrite(save_file, TrainId_img);
+        print(os.path.join(save_path,save_filename))
+       
 train_label_img_paths = []
 
 img_dir = cityscapes_data_path + "/leftImg8bit/train/"
