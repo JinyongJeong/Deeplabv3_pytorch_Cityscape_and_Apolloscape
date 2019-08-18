@@ -170,49 +170,6 @@ for path in list(data_paths):
        
 train_label_img_paths = []
 
-img_dir = cityscapes_data_path + "/leftImg8bit/train/"
-label_dir = cityscapes_data_path + "/gtFine/train/"
-for train_dir in train_dirs:
-    print (train_dir)
-
-    train_img_dir_path = img_dir + train_dir
-    train_label_dir_path = label_dir + train_dir
-
-    file_names = os.listdir(train_img_dir_path)
-    for file_name in file_names:
-        img_id = file_name.split("_leftImg8bit.png")[0]
-
-        gtFine_img_path = train_label_dir_path + img_id + "_gtFine_labelIds.png"
-        gtFine_img = cv2.imread(gtFine_img_path, -1) # (shape: (1024, 2048))
-
-        # convert gtFine_img from id to trainId pixel values:
-        label_img = id_to_trainId_map_func(gtFine_img) # (shape: (1024, 2048))
-        label_img = label_img.astype(np.uint8)
-
-        cv2.imwrite(cityscapes_meta_path + "/label_imgs/" + img_id + ".png", label_img)
-        train_label_img_paths.append(cityscapes_meta_path + "/label_imgs/" + img_id + ".png")
-
-img_dir = cityscapes_data_path + "/leftImg8bit/val/"
-label_dir = cityscapes_data_path + "/gtFine/val/"
-for val_dir in val_dirs:
-    print (val_dir)
-
-    val_img_dir_path = img_dir + val_dir
-    val_label_dir_path = label_dir + val_dir
-
-    file_names = os.listdir(val_img_dir_path)
-    for file_name in file_names:
-        img_id = file_name.split("_leftImg8bit.png")[0]
-
-        gtFine_img_path = val_label_dir_path + img_id + "_gtFine_labelIds.png"
-        gtFine_img = cv2.imread(gtFine_img_path, -1) # (shape: (1024, 2048))
-
-        # convert gtFine_img from id to trainId pixel values:
-        label_img = id_to_trainId_map_func(gtFine_img) # (shape: (1024, 2048))
-        label_img = label_img.astype(np.uint8)
-
-        cv2.imwrite(cityscapes_meta_path + "/label_imgs/" + img_id + ".png", label_img)
-
 ################################################################################
 # compute the class weigths:
 ################################################################################
