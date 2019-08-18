@@ -106,7 +106,8 @@ for epoch in range(start_epoch, num_epochs):
     batch_losses = []
     for step, (imgs, label_imgs) in enumerate(train_loader):
         #current_time = time.time()
-
+        #print(imgs.shape)
+        #print(label_imgs.shape)
         imgs = Variable(imgs).cuda() # (shape: (batch_size, 3, img_h, img_w))
         label_imgs = Variable(label_imgs.type(torch.LongTensor)).cuda() # (shape: (batch_size, img_h, img_w))
 

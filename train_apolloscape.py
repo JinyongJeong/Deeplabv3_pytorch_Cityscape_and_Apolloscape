@@ -7,7 +7,7 @@ default_path = os.path.dirname(os.path.abspath(__file__))
 from datasets_apolloscape import DatasetTrain, DatasetVal # (this needs to be imported before torch, because cv2 needs to be imported before torch for some reason)
 
 sys.path.append(os.path.join(default_path,'model'))
-from deeplabv3 import DeepLabV3
+from deeplabv3_apolloscape import DeepLabV3
 
 sys.path.append(os.path.join(default_path,'utils'))
 from utils import add_weight_decay
@@ -45,7 +45,7 @@ model_id = "2"
 num_epochs = 1000
 batch_size = 3
 learning_rate = 0.0001
-checkpoint_save_stride = 10
+checkpoint_save_stride = 1
 
 network = DeepLabV3(model_id, project_dir=default_path).cuda()
 
@@ -81,7 +81,7 @@ val_loader = torch.utils.data.DataLoader(dataset=val_dataset,
 params = add_weight_decay(network, l2_value=0.0001)
 optimizer = torch.optim.Adam(params, lr=learning_rate)
 
-with open(os.path.join(default_path,'data/apolloscape/class_weights.pkl'), "rb") as file: # (needed for python3)
+with open(os.path.join(default_path,'data/apolloscapes/class_weights.pkl'), "rb") as file: # (needed for python3)
     class_weights = np.array(pickle.load(file))
 class_weights = torch.from_numpy(class_weights)
 class_weights = Variable(class_weights.type(torch.FloatTensor)).cuda()
@@ -104,12 +104,11 @@ for epoch in range(start_epoch, num_epochs):
     batch_losses = []
     for step, (imgs, label_imgs) in enumerate(train_loader):
         #current_time = time.time()
-
+        print("Epoch: " + str(epoch) + " step: " + str(step))
         imgs = Variable(imgs).cuda() # (shape: (batch_size, 3, img_h, img_w))
         label_imgs = Variable(label_imgs.type(torch.LongTensor)).cuda() # (shape: (batch_size, img_h, img_w))
 
         outputs = network(imgs) # (shape: (batch_size, num_classes, img_h, img_w))
-        
         # compute the loss:
         loss = loss_fn(outputs, label_imgs)
         loss_value = loss.data.cpu().numpy()

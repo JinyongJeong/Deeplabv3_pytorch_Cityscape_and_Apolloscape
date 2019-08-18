@@ -214,7 +214,9 @@ with open(apolloscape_data_path + "/class_weights.pkl", "wb") as file:
 
 # Save train & eval path
 with open(apolloscape_data_path + "/train_data_path.pkl","wb") as file:
-    pickle.dump(train_data_paths, file)
+    for data_path in train_data_paths:
+        pickle.dump(data_path, file)
 with open(apolloscape_data_path + "/eval_data_path.pkl","wb") as file:
-    pickle.dump(eval_data_paths, file)
+    for data_path in eval_data_paths:
+        pickle.dump(data_path, file)
 

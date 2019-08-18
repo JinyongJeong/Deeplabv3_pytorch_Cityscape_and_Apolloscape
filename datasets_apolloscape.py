@@ -7,15 +7,27 @@ import numpy as np
 import cv2
 import os
 import pickle
-
+import glob
 default_path = os.path.dirname(os.path.abspath(__file__))
 apolloscape_data_path = os.path.join(default_path,'data/apolloscapes')
 train_data_path_file = os.path.join(apolloscape_data_path,'train_data_path.pkl')
 eval_data_path_file = os.path.join(apolloscape_data_path,'eval_data_path.pkl')
-with open(train_data_path_file, 'wb') as f:
-    train_data_path = pickle.load(f)
-with open(eval_data_path_file, 'wb') as f:
-    eval_data_path = pickle.load(f)
+train_data_path = []
+eval_data_path = []
+with open(train_data_path_file, 'rb') as f:
+    while True:
+        try:
+            data = pickle.load(f)
+        except EOFError:
+            break
+        train_data_path.append(data)
+with open(eval_data_path_file, 'rb') as f:
+     while True:
+        try:
+            data = pickle.load(f)
+        except EOFError:
+            break
+        eval_data_path.append(data)
 
 
 class DatasetTrain(torch.utils.data.Dataset):
@@ -38,7 +50,7 @@ class DatasetTrain(torch.utils.data.Dataset):
                 img_path = file_path.replace('Labels_', 'ColorImage_')
                 img_path = img_path.replace('Label','ColorImage')
                 img_path = img_path.replace('_bin.png','.jpg')
-                label_path = file_path.replace('Labels_', 'Labels_')
+                label_path = file_path.replace('Labels_', 'Trainid_')
                 example = {}
                 example["img_path"] = img_path
                 example["label_img_path"] = label_path
