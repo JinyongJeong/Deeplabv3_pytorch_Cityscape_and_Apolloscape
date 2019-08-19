@@ -169,7 +169,7 @@ class DatasetVal(torch.utils.data.Dataset):
                 img_path = file_path.replace('Labels_', 'ColorImage_')
                 img_path = img_path.replace('Label','ColorImage')
                 img_path = img_path.replace('_bin.png','.jpg')
-                label_path = file_path.replace('Labels_', 'Labels_')
+                label_path = file_path.replace('Labels_', 'Trainid_')
                 example = {}
                 example["img_path"] = img_path
                 example["label_img_path"] = label_path
