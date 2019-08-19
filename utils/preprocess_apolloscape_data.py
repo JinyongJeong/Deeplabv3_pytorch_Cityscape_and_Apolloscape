@@ -128,6 +128,21 @@ for label in labels:
 eval_data_rate = 0.1
 image_overwrite = False
 
+# original dataset image size
+origin_img_h = 2710
+origin_img_w = 3384
+
+# ROI region
+new_img_roi_h = 1300
+new_img_roi_w = 2970
+new_img_center_h = 1650
+new_img_center_w = 1650
+
+new_img_h = 560
+new_img_w = 1280
+
+                                                      
+
 total_num_images = 0
 #count total image number
 random.shuffle(data_paths)
@@ -141,12 +156,17 @@ for path in list(data_paths):
     image_path = os.path.join(path, '*.png')
     images = glob.glob(image_path)
     total_num_images = total_num_images + len(images)
-    
+   
+#Image size decrease for learning speed up
 image_index = 0
 for path in list(data_paths):
     save_path = path.replace("Labels_", "Trainid_")
+    resized_color_save_path = path.replace("Labels_","ColorImage_resize_")
+    resized_color_save_path = resized_color_save_path.replace("Label","ColorImage")
     if not os.path.exists(save_path):
         os.makedirs(save_path)
+    if not os.path.exists(resized_color_save_path):
+        os.makedirs(resized_color_save_path)
     
     image_path = os.path.join(path, '*.png')
     images = glob.glob(image_path)
@@ -155,18 +175,36 @@ for path in list(data_paths):
     for image in list(images):
         image_index = image_index + 1
         save_filename = os.path.basename(image)
-        save_file = os.path.join(save_path, save_filename)
+        save_file_path = os.path.join(save_path, save_filename)
         if not image_overwrite:
-            if os.path.exists(save_file):
+            if os.path.exists(save_file_path):
                 print("Converted file exist " + str(image_index) +"/" + str(total_num_images))
                 continue
         print("processing..." + str(image_index) + "/" + str(total_num_images))
+        # TrainID conversion
         label_img = cv2.imread(image, cv2.IMREAD_COLOR)
         TrainId_img = label_img.dot(np.array([65536, 256, 1], dtype='int32'))
         TrainId_img = color_map[TrainId_img]
+        # Crop for ROI and resize
+        TrainId_img = TrainId_img[new_img_center_h - round(new_img_roi_h/2):new_img_center_h + round(new_img_roi_h/2),
+                new_img_center_w - round(new_img_roi_w/2):new_img_center_w + round(new_img_roi_w/2)]
+        TrainId_img = cv2.resize(TrainId_img, (new_img_w, new_img_h),
+                interpolation=cv2.INTER_NEAREST) 
+        cv2.imwrite(save_file_path, TrainId_img)
 
-        cv2.imwrite(save_file, TrainId_img);
-        print(os.path.join(save_path,save_filename))
+        # Color image ROI and resize 
+        color_img_path = image.replace("Labels_", "ColorImage_")
+        color_img_path = color_img_path.replace("Label", "ColorImage")
+        color_img_path = color_img_path.replace("_bin.png", ".jpg")
+        color_img = cv2.imread(color_img_path, cv2.IMREAD_COLOR)
+        color_img = color_img[new_img_center_h - round(new_img_roi_h/2):new_img_center_h + round(new_img_roi_h/2),
+                new_img_center_w - round(new_img_roi_w/2):new_img_center_w + round(new_img_roi_w/2)]
+        color_img = cv2.resize(color_img, (new_img_w, new_img_h),
+                interpolation=cv2.INTER_NEAREST) 
+        resized_color_img_path = color_img_path.replace("ColorImage_","ColorImage_resize_")
+        cv2.imwrite(resized_color_img_path, color_img)
+
+        print(save_file_path)
        
 
 ################################################################################

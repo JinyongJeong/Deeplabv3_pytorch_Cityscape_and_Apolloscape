@@ -8,6 +8,7 @@ import cv2
 import os
 import pickle
 import glob
+import time
 default_path = os.path.dirname(os.path.abspath(__file__))
 apolloscape_data_path = os.path.join(default_path,'data/apolloscapes')
 train_data_path_file = os.path.join(apolloscape_data_path,'train_data_path.pkl')
@@ -65,36 +66,28 @@ class DatasetTrain(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         example = self.examples[index]
-
+        tic = time.clock()
         img_path = example["img_path"]
-        img = cv2.imread(img_path, -1) # (shape: (1024, 2048, 3))
+        img = cv2.imread(img_path, -1) # (shape: (1024, 2048, 3)
+        toc = time.clock()
+        #print("load: " + str(toc - tic))
+        tic = time.clock()
         img = img[self.new_img_center_h - round(self.new_img_roi_h/2):self.new_img_center_h + round(self.new_img_roi_h/2),
                 self.new_img_center_w - round(self.new_img_roi_w/2):self.new_img_center_w + round(self.new_img_roi_w/2)]
-        # resize img without interpolation (want the image to still match
-        # label_img, which we resize below):
-        img = cv2.resize(img, (self.new_img_w, self.new_img_h),
-                         interpolation=cv2.INTER_NEAREST) # (shape: (512, 1024, 3))
+        toc = time.clock()
+        #print("crop" + str(toc - tic))
 
         label_img_path = example["label_img_path"]
         label_img = cv2.imread(label_img_path, -1) # (shape: (1024, 2048))
         label_img = label_img[self.new_img_center_h - round(self.new_img_roi_h/2):self.new_img_center_h + round(self.new_img_roi_h/2),
                 self.new_img_center_w - round(self.new_img_roi_w/2):self.new_img_center_w + round(self.new_img_roi_w/2)]
         
-        # resize label_img without interpolation (want the resulting image to
-        # still only contain pixel values corresponding to an object class):
-        label_img = cv2.resize(label_img, (self.new_img_w, self.new_img_h),
-                               interpolation=cv2.INTER_NEAREST) # (shape: (512, 1024))
-
-        # flip the img and the label with 0.5 probability:
-        flip = np.random.randint(low=0, high=2)
-        if flip == 1:
-            img = cv2.flip(img, 1)
-            label_img = cv2.flip(label_img, 1)
 
         ########################################################################
         # randomly scale the img and the label:
         ########################################################################
-        scale = np.random.uniform(low=0.7, high=2.0)
+        tic = time.clock()
+        scale = np.random.uniform(low=0.7, high=1.5)
         new_img_h = int(scale*self.new_img_h)
         new_img_w = int(scale*self.new_img_w)
 
@@ -107,7 +100,17 @@ class DatasetTrain(torch.utils.data.Dataset):
         # still only contain pixel values corresponding to an object class):
         label_img = cv2.resize(label_img, (new_img_w, new_img_h),
                                interpolation=cv2.INTER_NEAREST) # (shape: (new_img_h, new_img_w))
+        toc = time.clock()
+        #print("resize two image" + str(toc - tic))
         ########################################################################
+        # flip the img and the label with 0.5 probability:
+        tic = time.clock()
+        flip = np.random.randint(low=0, high=2)
+        if flip == 1:
+            img = cv2.flip(img, 1)
+            label_img = cv2.flip(label_img, 1)
+        toc = time.clock()
+        #print("flip" + str(toc - tic))
 
         # # # # # # # # debug visualization START
         # print (scale)
@@ -120,7 +123,7 @@ class DatasetTrain(torch.utils.data.Dataset):
         # cv2.imshow("test", label_img)
         # cv2.waitKey(0)
         # # # # # # # # debug visualization END
-
+        tic = time.clock()
         ########################################################################
         # select a 256x256 random crop from the img and label:
         ########################################################################
@@ -154,7 +157,8 @@ class DatasetTrain(torch.utils.data.Dataset):
         # convert numpy -> torch:
         img = torch.from_numpy(img) # (shape: (3, 256, 256))
         label_img = torch.from_numpy(label_img) # (shape: (256, 256))
-
+        toc = time.clock()
+        #print("rest: " + str(toc - tic))
         return (img, label_img)
 
     def __len__(self):
