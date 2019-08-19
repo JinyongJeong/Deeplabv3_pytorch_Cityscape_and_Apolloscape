@@ -44,7 +44,7 @@ model_id = "2"
 
 num_epochs = 1000
 train_batch_size = 50
-eval_batch_size = 50
+eval_batch_size = 30
 learning_rate = 0.0001
 checkpoint_save_stride = 1
 
