@@ -37,8 +37,13 @@ class DatasetTrain(torch.utils.data.Dataset):
         self.img_h = 2710
         self.img_w = 3384
 
-        self.new_img_h = 512
-        self.new_img_w = 1024
+        self.new_img_roi_h = 1300
+        self.new_img_roi_w = 2970
+        self.new_img_center_h = 1650
+        self.new_img_center_w = 1650
+
+        self.new_img_h = 560
+        self.new_img_w = 1280
 
         self.examples = []
         for train_dir in train_data_path:
@@ -63,6 +68,8 @@ class DatasetTrain(torch.utils.data.Dataset):
 
         img_path = example["img_path"]
         img = cv2.imread(img_path, -1) # (shape: (1024, 2048, 3))
+        img = img[self.new_img_center_h - round(self.new_img_roi_h/2):self.new_img_center_h + round(self.new_img_roi_h/2),
+                self.new_img_center_w - round(self.new_img_roi_w/2):self.new_img_center_w + round(self.new_img_roi_w/2)]
         # resize img without interpolation (want the image to still match
         # label_img, which we resize below):
         img = cv2.resize(img, (self.new_img_w, self.new_img_h),
@@ -70,6 +77,9 @@ class DatasetTrain(torch.utils.data.Dataset):
 
         label_img_path = example["label_img_path"]
         label_img = cv2.imread(label_img_path, -1) # (shape: (1024, 2048))
+        label_img = label_img[self.new_img_center_h - round(self.new_img_roi_h/2):self.new_img_center_h + round(self.new_img_roi_h/2),
+                self.new_img_center_w - round(self.new_img_roi_w/2):self.new_img_center_w + round(self.new_img_roi_w/2)]
+        
         # resize label_img without interpolation (want the resulting image to
         # still only contain pixel values corresponding to an object class):
         label_img = cv2.resize(label_img, (self.new_img_w, self.new_img_h),
@@ -156,10 +166,13 @@ class DatasetVal(torch.utils.data.Dataset):
         self.img_h = 2710
         self.img_w = 3384
 
-        #self.new_img_h = 1355
-        #self.new_img_w = 1692
-        self.new_img_h = 512
-        self.new_img_w = 1024
+        self.new_img_roi_h = 1300
+        self.new_img_roi_w = 2970
+        self.new_img_center_h = 1650
+        self.new_img_center_w = 1650
+
+        self.new_img_h = 560
+        self.new_img_w = 1280
 
         self.examples = []
         for eval_dir in eval_data_path:
@@ -185,6 +198,8 @@ class DatasetVal(torch.utils.data.Dataset):
 
         img_path = example["img_path"]
         img = cv2.imread(img_path, -1) # (shape: (1024, 2048, 3))
+        img = img[self.new_img_center_h - round(self.new_img_roi_h/2):self.new_img_center_h + round(self.new_img_roi_h/2),
+                self.new_img_center_w - round(self.new_img_roi_w/2):self.new_img_center_w + round(self.new_img_roi_w/2)]
         # resize img without interpolation (want the image to still match
         # label_img, which we resize below):
         img = cv2.resize(img, (self.new_img_w, self.new_img_h),
@@ -192,6 +207,9 @@ class DatasetVal(torch.utils.data.Dataset):
 
         label_img_path = example["label_img_path"]
         label_img = cv2.imread(label_img_path, -1) # (shape: (1024, 2048))
+        label_img = label_img[self.new_img_center_h - round(self.new_img_roi_h/2):self.new_img_center_h + round(self.new_img_roi_h/2),
+                self.new_img_center_w - round(self.new_img_roi_w/2):self.new_img_center_w + round(self.new_img_roi_w/2)]
+        
         # resize label_img without interpolation (want the resulting image to
         # still only contain pixel values corresponding to an object class):
         label_img = cv2.resize(label_img, (self.new_img_w, self.new_img_h),
