@@ -44,4 +44,5 @@ class DeepLabV3(nn.Module):
             os.makedirs(self.logs_dir)
         if not os.path.exists(self.model_dir):
             os.makedirs(self.model_dir)
+        if not os.path.exists(self.checkpoints_dir):
             os.makedirs(self.checkpoints_dir)
