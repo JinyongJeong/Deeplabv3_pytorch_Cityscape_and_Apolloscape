@@ -74,10 +74,10 @@ print ("num_val_batches:", num_val_batches)
 
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                            batch_size=train_batch_size, shuffle=True,
-                                           num_workers=1)
+                                           num_workers=40)
 val_loader = torch.utils.data.DataLoader(dataset=val_dataset,
                                          batch_size=eval_batch_size, shuffle=False,
-                                         num_workers=1)
+                                         num_workers=40)
 
 params = add_weight_decay(network, l2_value=0.0001)
 optimizer = torch.optim.Adam(params, lr=learning_rate)
