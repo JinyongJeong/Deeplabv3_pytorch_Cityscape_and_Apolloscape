@@ -50,10 +50,12 @@ class DatasetTrain(torch.utils.data.Dataset):
                 img_path = img_path.replace('Label','ColorImage')
                 img_path = img_path.replace('_bin.png','.jpg')
                 label_path = file_path.replace('Labels_', 'Trainid_')
-                example = {}
-                example["img_path"] = img_path
-                example["label_img_path"] = label_path
-                self.examples.append(example)
+                
+                if os.path.exists(img_path) and os.path.exists(label_path):
+                    example = {}
+                    example["img_path"] = img_path
+                    example["label_img_path"] = label_path
+                    self.examples.append(example)
 
         self.num_examples = len(self.examples)
 
@@ -64,7 +66,7 @@ class DatasetTrain(torch.utils.data.Dataset):
 
         label_img_path = example["label_img_path"]
         label_img = cv2.imread(label_img_path, -1) # (shape: (560, 1280))
-        
+       
 
         ########################################################################
         # randomly scale the img and the label:
@@ -155,10 +157,11 @@ class DatasetVal(torch.utils.data.Dataset):
                 img_path = img_path.replace('Label','ColorImage')
                 img_path = img_path.replace('_bin.png','.jpg')
                 label_path = file_path.replace('Labels_', 'Trainid_')
-                example = {}
-                example["img_path"] = img_path
-                example["label_img_path"] = label_path
-                self.examples.append(example)
+                if os.path.exists(img_path) and os.path.exists(label_path):
+                    example = {}
+                    example["img_path"] = img_path
+                    example["label_img_path"] = label_path
+                    self.examples.append(example)
 
         self.num_examples = len(self.examples)
 
@@ -167,12 +170,12 @@ class DatasetVal(torch.utils.data.Dataset):
 
 
         img_path = example["img_path"]
+        #print(img_path)
         img = cv2.imread(img_path, -1) # (shape: (560, 1280, 3))
 
         label_img_path = example["label_img_path"]
         label_img = cv2.imread(label_img_path, -1) # (shape: (560, 1280))
         
-
         # # # # # # # # debug visualization START
         # cv2.imshow("test", img)
         # cv2.waitKey(0)

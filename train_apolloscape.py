@@ -74,10 +74,10 @@ print ("num_val_batches:", num_val_batches)
 
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                            batch_size=train_batch_size, shuffle=True,
-                                           num_workers=40)
+                                           num_workers=30)
 val_loader = torch.utils.data.DataLoader(dataset=val_dataset,
                                          batch_size=eval_batch_size, shuffle=False,
-                                         num_workers=40)
+                                         num_workers=30)
 
 params = add_weight_decay(network, l2_value=0.0001)
 optimizer = torch.optim.Adam(params, lr=learning_rate)
@@ -143,6 +143,7 @@ for epoch in range(start_epoch, num_epochs):
     batch_losses = []
     for step, (imgs, label_imgs) in enumerate(val_loader):
         print("Eval Epoch: " + str(epoch) + " step: " + str(step))
+        
         with torch.no_grad(): # (corresponds to setting volatile=True in all variables, this is done during inference to reduce memory consumption)
             imgs = Variable(imgs).cuda() # (shape: (batch_size, 3, img_h, img_w))
             label_imgs = Variable(label_imgs.type(torch.LongTensor)).cuda() # (shape: (batch_size, img_h, img_w))
