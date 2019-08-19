@@ -46,7 +46,7 @@ class DatasetTrain(torch.utils.data.Dataset):
             file_list = glob.glob(file_dir)
 
             for file_path in file_list:
-                img_path = file_path.replace('Labels_', 'ColorImage_')
+                img_path = file_path.replace('Labels_', 'ColorImage_resize_')
                 img_path = img_path.replace('Label','ColorImage')
                 img_path = img_path.replace('_bin.png','.jpg')
                 label_path = file_path.replace('Labels_', 'Trainid_')
@@ -61,12 +61,12 @@ class DatasetTrain(torch.utils.data.Dataset):
         example = self.examples[index]
         tic = time.clock()
         img_path = example["img_path"]
-        img = cv2.imread(img_path, -1) # (shape: (1024, 2048, 3)
+        img = cv2.imread(img_path, -1) # (shape: (560, 1280, 3)
         toc = time.clock()
         print("load: " + str(toc - tic))
 
         label_img_path = example["label_img_path"]
-        label_img = cv2.imread(label_img_path, -1) # (shape: (1024, 2048))
+        label_img = cv2.imread(label_img_path, -1) # (shape: (560, 1280))
         
 
         ########################################################################
@@ -163,7 +163,7 @@ class DatasetVal(torch.utils.data.Dataset):
             file_list = glob.glob(file_dir)
 
             for file_path in file_list:
-                img_path = file_path.replace('Labels_', 'ColorImage_')
+                img_path = file_path.replace('Labels_', 'ColorImage_resize_')
                 img_path = img_path.replace('Label','ColorImage')
                 img_path = img_path.replace('_bin.png','.jpg')
                 label_path = file_path.replace('Labels_', 'Trainid_')
@@ -179,10 +179,10 @@ class DatasetVal(torch.utils.data.Dataset):
 
 
         img_path = example["img_path"]
-        img = cv2.imread(img_path, -1) # (shape: (1024, 2048, 3))
+        img = cv2.imread(img_path, -1) # (shape: (560, 1280, 3))
 
         label_img_path = example["label_img_path"]
-        label_img = cv2.imread(label_img_path, -1) # (shape: (1024, 2048))
+        label_img = cv2.imread(label_img_path, -1) # (shape: (560, 1280))
         
 
         # # # # # # # # debug visualization START
@@ -196,13 +196,13 @@ class DatasetVal(torch.utils.data.Dataset):
         # normalize the img (with the mean and std for the pretrained ResNet):
         img = img/255.0
         img = img - np.array([0.485, 0.456, 0.406])
-        img = img/np.array([0.229, 0.224, 0.225]) # (shape: (512, 1024, 3))
-        img = np.transpose(img, (2, 0, 1)) # (shape: (3, 512, 1024))
+        img = img/np.array([0.229, 0.224, 0.225]) # (shape: (560, 1280, 3))
+        img = np.transpose(img, (2, 0, 1)) # (shape: (3, 560, 1280))
         img = img.astype(np.float32)
 
         # convert numpy -> torch:
-        img = torch.from_numpy(img) # (shape: (3, 512, 1024))
-        label_img = torch.from_numpy(label_img) # (shape: (512, 1024))
+        img = torch.from_numpy(img) # (shape: (3, 560, 1280))
+        label_img = torch.from_numpy(label_img) # (shape: (560, 1280))
 
         return (img, label_img)
 
