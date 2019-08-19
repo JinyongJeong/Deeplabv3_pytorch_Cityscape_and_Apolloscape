@@ -37,8 +37,8 @@ class DatasetTrain(torch.utils.data.Dataset):
         self.img_h = 2710
         self.img_w = 3384
 
-        self.new_img_h = 1355
-        self.new_img_w = 1692
+        self.new_img_h = 512
+        self.new_img_w = 1024
 
         self.examples = []
         for train_dir in train_data_path:
@@ -156,8 +156,10 @@ class DatasetVal(torch.utils.data.Dataset):
         self.img_h = 2710
         self.img_w = 3384
 
-        self.new_img_h = 1355
-        self.new_img_w = 1692
+        #self.new_img_h = 1355
+        #self.new_img_w = 1692
+        self.new_img_h = 512
+        self.new_img_w = 1024
 
         self.examples = []
         for eval_dir in eval_data_path:
@@ -180,7 +182,6 @@ class DatasetVal(torch.utils.data.Dataset):
     def __getitem__(self, index):
         example = self.examples[index]
 
-        img_id = example["img_id"]
 
         img_path = example["img_path"]
         img = cv2.imread(img_path, -1) # (shape: (1024, 2048, 3))
@@ -215,7 +216,7 @@ class DatasetVal(torch.utils.data.Dataset):
         img = torch.from_numpy(img) # (shape: (3, 512, 1024))
         label_img = torch.from_numpy(label_img) # (shape: (512, 1024))
 
-        return (img, label_img, img_id)
+        return (img, label_img)
 
     def __len__(self):
         return self.num_examples
