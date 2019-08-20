@@ -126,17 +126,17 @@ for label in labels:
 ################################################################################
 
 eval_data_rate = 0.1
-image_overwrite = False
+image_overwrite = True
 
 # original dataset image size
 origin_img_h = 2710
 origin_img_w = 3384
 
 # ROI region
-new_img_roi_h = 1300
-new_img_roi_w = 2970
-new_img_center_h = 1650
-new_img_center_w = 1650
+new_img_roi_h = 962
+new_img_roi_w = 2200
+new_img_center_h = 1750
+new_img_center_w = 1670
 
 new_img_h = 560
 new_img_w = 1280
