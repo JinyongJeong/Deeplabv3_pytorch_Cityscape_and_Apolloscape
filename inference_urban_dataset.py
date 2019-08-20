@@ -4,8 +4,6 @@ import sys
 import os
 default_path = os.path.dirname(os.path.abspath(__file__))
 
-from datasets_apolloscape import DatasetTrain, DatasetVal # (this needs to be imported before torch, because cv2 needs to be imported before torch for some reason)
-
 sys.path.append(os.path.join(default_path,'model'))
 from deeplabv3_apolloscape import DeepLabV3
 
@@ -58,30 +56,45 @@ else:
     print("Can't find checkpoint for loading")
     quit()
 
-val_dataset = DatasetVal()
-
-val_loader = torch.utils.data.DataLoader(dataset=val_dataset,
-                                         batch_size=eval_batch_size, shuffle=False,
-                                         num_workers=30)
-
 ############################################################################
 # inference:
 ############################################################################
 network.eval() # (set in evaluation mode, this affects BatchNorm and dropout)
 
-save_path = os.path.join(default_path,'inference/apolloscape')
+save_path = os.path.join(default_path,'inference/urban_dataset')
 if not os.path.exists(save_path):
     os.makedirs(save_path)
 
-img_index = 0
-print("Start inference")
-for step, (imgs, label_imgs) in enumerate(val_loader):
-    print("Eval step: " + str(step))
-    
-    with torch.no_grad(): # (corresponds to setting volatile=True in all variables, this is done during inference to reduce memory consumption)
-        imgs = Variable(imgs).cuda() # (shape: (batch_size, 3, img_h, img_w))
+# get data list
+source_img_path = '/data/urban_dataset/urban39-pankyo/image/stereo_left'
+img_list = sorted(glob.glob(os.path.join(source_img_path, '*.png')))
 
-        #label_imgs = Variable(label_imgs.type(torch.LongTensor)).cuda() # (shape: (batch_size, img_h, img_w))
+print(len(img_list))
+print("Start inference")
+
+img_index = 0
+for img_path in img_list:
+    print("inference image: " , str(img_index) , "/" , str(len(img_list)))
+    with torch.no_grad():
+        img_raw = cv2.imread(img_path, -1)
+        img_raw = cv2.cvtColor(img_raw, cv2.COLOR_BAYER_BG2RGB)
+        #cv2.imwrite( os.path.join(save_path, str(img_index) + '.png'), img_raw)
+        #img_index += 1
+        #continue
+        img_raw = img_raw/255.0
+        img_raw = img_raw - np.array([0.485, 0.456, 0.406])
+        img_raw = img_raw/np.array([0.229, 0.224, 0.225]) # (shape: (560, 1280, 3))
+        img_raw = np.transpose(img_raw, (2, 0, 1)) # (shape: (3, 560, 1280))
+        img_raw = img_raw.astype(np.float32)
+
+        # convert numpy -> torch:
+        img_raw = torch.from_numpy(img_raw) # (shape: (3, 560, 1280))
+        img_raw = img_raw[None, :]
+
+        imgs = Variable(img_raw).cuda()
+        #imgs = imgs[None, :,:,:]
+        imgs = imgs.float()
+        #imgs = imgs.transpose(2,1,0)
         outputs = network(imgs) # (shape: (batch_size, num_classes, img_h, img_w))
 
         # compute the loss:
@@ -108,4 +121,6 @@ for step, (imgs, label_imgs) in enumerate(val_loader):
             save_file_path = os.path.join(save_path, str(img_index) + '.png')
             cv2.imwrite(save_file_path, overlayed_img)
             img_index += 1
+
+    
 
