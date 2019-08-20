@@ -150,7 +150,7 @@ class DatasetVal(torch.utils.data.Dataset):
         for eval_dir in eval_data_path:
 
             file_dir = os.path.join(eval_dir,"*.png")
-            file_list = glob.glob(file_dir)
+            file_list = sorted(glob.glob(file_dir))
 
             for file_path in file_list:
                 img_path = file_path.replace('Labels_', 'ColorImage_resize_')
