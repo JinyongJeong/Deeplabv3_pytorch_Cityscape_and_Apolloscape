@@ -85,12 +85,6 @@ class DatasetTrain(torch.utils.data.Dataset):
         label_img = cv2.resize(label_img, (new_img_w, new_img_h),
                                interpolation=cv2.INTER_NEAREST) # (shape: (new_img_h, new_img_w))
         ########################################################################
-        # flip the img and the label with 0.5 probability:
-        flip = np.random.randint(low=0, high=2)
-        if flip == 1:
-            img = cv2.flip(img, 1)
-            label_img = cv2.flip(label_img, 1)
-
         # # # # # # # # debug visualization START
         # print (scale)
         # print (new_img_h)
@@ -113,7 +107,13 @@ class DatasetTrain(torch.utils.data.Dataset):
         img = img[start_y:end_y, start_x:end_x] # (shape: (256, 256, 3))
         label_img = label_img[start_y:end_y, start_x:end_x] # (shape: (256, 256))
         ########################################################################
+        # flip the img and the label with 0.5 probability:
+        flip = np.random.randint(low=0, high=2)
+        if flip == 1:
+            img = cv2.flip(img, 1)
+            label_img = cv2.flip(label_img, 1)
 
+ 
         # # # # # # # # debug visualization START
         # print (img.shape)
         # print (label_img.shape)
