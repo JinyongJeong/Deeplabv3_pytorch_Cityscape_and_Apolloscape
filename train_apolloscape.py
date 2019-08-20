@@ -47,7 +47,7 @@ train_batch_size = 150
 eval_batch_size = 30
 learning_rate = 0.0001
 
-eval_stride = 5
+eval_stride = 10
 checkpoint_save_stride = 5
 logs_dir = os.path.join(default_path, 'training_logs')
 checkpoints_dir = os.path.join(default_path, 'training_logs', 'model_' + str(model_id), 'checkpoints') 
@@ -158,61 +158,60 @@ for epoch in range(start_epoch, num_epochs):
     # val:
     ############################################################################
 
-    if not epoch%eval_stride == 0:
-        continue
-    network.eval() # (set in evaluation mode, this affects BatchNorm and dropout)
-    batch_losses = []
-    for step, (imgs, label_imgs) in enumerate(val_loader):
-        print("Eval Epoch: " + str(epoch) + " step: " + str(step))
-        
-        with torch.no_grad(): # (corresponds to setting volatile=True in all variables, this is done during inference to reduce memory consumption)
-            imgs = Variable(imgs).cuda() # (shape: (batch_size, 3, img_h, img_w))
-            label_imgs = Variable(label_imgs.type(torch.LongTensor)).cuda() # (shape: (batch_size, img_h, img_w))
+    if epoch%eval_stride == 0:
+        network.eval() # (set in evaluation mode, this affects BatchNorm and dropout)
+        batch_losses = []
+        for step, (imgs, label_imgs) in enumerate(val_loader):
+            print("Eval Epoch: " + str(epoch) + " step: " + str(step))
+            
+            with torch.no_grad(): # (corresponds to setting volatile=True in all variables, this is done during inference to reduce memory consumption)
+                imgs = Variable(imgs).cuda() # (shape: (batch_size, 3, img_h, img_w))
+                label_imgs = Variable(label_imgs.type(torch.LongTensor)).cuda() # (shape: (batch_size, img_h, img_w))
 
-            outputs = network(imgs) # (shape: (batch_size, num_classes, img_h, img_w))
+                outputs = network(imgs) # (shape: (batch_size, num_classes, img_h, img_w))
 
-            # compute the loss:
-            loss = loss_fn(outputs, label_imgs)
-            loss_value = loss.data.cpu().numpy()
-            batch_losses.append(loss_value)
+                # compute the loss:
+                loss = loss_fn(outputs, label_imgs)
+                loss_value = loss.data.cpu().numpy()
+                batch_losses.append(loss_value)
 
-            #print (time.time() - current_time)
-            outputs = outputs.data.cpu().numpy() # (shape: (batch_size, num_classes, img_h, img_w))
-            pred_label_imgs = np.argmax(outputs, axis=1) # (shape: (batch_size, img_h, img_w))
-            pred_label_imgs = pred_label_imgs.astype(np.uint8)
+                #print (time.time() - current_time)
+                outputs = outputs.data.cpu().numpy() # (shape: (batch_size, num_classes, img_h, img_w))
+                pred_label_imgs = np.argmax(outputs, axis=1) # (shape: (batch_size, img_h, img_w))
+                pred_label_imgs = pred_label_imgs.astype(np.uint8)
 
-            for i in range(pred_label_imgs.shape[0]):
-                if i == 0:
-                    pred_label_img = pred_label_imgs[i] # (shape: (img_h, img_w))
-                    img = imgs[i] # (shape: (3, img_h, img_w))
+                for i in range(pred_label_imgs.shape[0]):
+                    if i == 0:
+                        pred_label_img = pred_label_imgs[i] # (shape: (img_h, img_w))
+                        img = imgs[i] # (shape: (3, img_h, img_w))
 
-                    img = img.data.cpu().numpy()
-                    img = np.transpose(img, (1, 2, 0)) # (shape: (img_h, img_w, 3))
-                    img = img*np.array([0.229, 0.224, 0.225])
-                    img = img + np.array([0.485, 0.456, 0.406])
-                    img = img*255.0
-                    img = img.astype(np.uint8)
+                        img = img.data.cpu().numpy()
+                        img = np.transpose(img, (1, 2, 0)) # (shape: (img_h, img_w, 3))
+                        img = img*np.array([0.229, 0.224, 0.225])
+                        img = img + np.array([0.485, 0.456, 0.406])
+                        img = img*255.0
+                        img = img.astype(np.uint8)
 
-                    pred_label_img_color = label_img_to_color_apolloscape(pred_label_img)
-                    overlayed_img = 0.35*img + 0.65*pred_label_img_color
-                    overlayed_img = overlayed_img.astype(np.uint8)
+                        pred_label_img_color = label_img_to_color_apolloscape(pred_label_img)
+                        overlayed_img = 0.35*img + 0.65*pred_label_img_color
+                        overlayed_img = overlayed_img.astype(np.uint8)
 
-                    cv2.imwrite(model_dir + "/test.png", overlayed_img)
+                        cv2.imwrite(model_dir + "/test.png", overlayed_img)
 
 
-    epoch_loss = np.mean(batch_losses)
-    epoch_losses_val.append(epoch_loss)
-    with open("%s/epoch_losses_val.pkl" % model_dir, "wb") as file:
-        pickle.dump(epoch_losses_val, file)
-    print ("val loss: %g" % epoch_loss)
-    plt.figure(1)
-    plt.plot(epoch_losses_val, "k^")
-    plt.plot(epoch_losses_val, "k")
-    plt.ylabel("loss")
-    plt.xlabel("epoch")
-    plt.title("val loss per epoch")
-    plt.savefig("%s/epoch_losses_val.png" % model_dir)
-    plt.close(1)
+        epoch_loss = np.mean(batch_losses)
+        epoch_losses_val.append(epoch_loss)
+        with open("%s/epoch_losses_val.pkl" % model_dir, "wb") as file:
+            pickle.dump(epoch_losses_val, file)
+        print ("val loss: %g" % epoch_loss)
+        plt.figure(1)
+        plt.plot(epoch_losses_val, "k^")
+        plt.plot(epoch_losses_val, "k")
+        plt.ylabel("loss")
+        plt.xlabel("epoch")
+        plt.title("val loss per epoch")
+        plt.savefig("%s/epoch_losses_val.png" % model_dir)
+        plt.close(1)
 
     # save the model weights to disk:
     if epoch%checkpoint_save_stride == 0:

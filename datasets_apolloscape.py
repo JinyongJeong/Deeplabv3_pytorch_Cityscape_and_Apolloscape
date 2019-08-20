@@ -112,8 +112,14 @@ class DatasetTrain(torch.utils.data.Dataset):
         if flip == 1:
             img = cv2.flip(img, 1)
             label_img = cv2.flip(label_img, 1)
-
- 
+        
+        # brightness augmentation
+        factor = 0.5
+        hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+        hsv = np.array(hsv, dtype=np.float64)
+        hsv[:, :, 2] = hsv[:, :, 2] * (factor + np.random.uniform()) #scale channel V uniformly
+        hsv[:, :, 2][hsv[:, :, 2] > 255] = 255 #reset out of range values
+        img = cv2.cvtColor(np.array(hsv, dtype=np.uint8), cv2.COLOR_HSV2RGB)
         # # # # # # # # debug visualization START
         # print (img.shape)
         # print (label_img.shape)
