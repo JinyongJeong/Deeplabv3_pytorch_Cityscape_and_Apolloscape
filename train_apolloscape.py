@@ -40,16 +40,25 @@ def getEpoch(checkpoint_name):
 
 
 # NOTE! NOTE! change this to not overwrite all log data when you train the model:
-model_id = "2"
+model_id = "3"
 
 num_epochs = 1000
-train_batch_size = 100
+train_batch_size = 150
 eval_batch_size = 30
 learning_rate = 0.0001
 
 eval_stride = 5
 checkpoint_save_stride = 5
+logs_dir = os.path.join(default_path, 'training_logs')
 checkpoints_dir = os.path.join(default_path, 'training_logs', 'model_' + str(model_id), 'checkpoints') 
+model_dir = os.path.join(default_path, 'training_logs', 'model_' + str(model_id)) 
+
+if not os.path.exists(logs_dir):
+    os.makedirs(logs_dir)
+if not os.path.exists(model_dir):
+    os.makedirs(model_dir)
+if not os.path.exists(checkpoints_dir):
+    os.makedirs(checkpoints_dir)
 
 # Single GPU
 #network = DeepLabV3(model_id, project_dir=default_path).cuda()
@@ -77,6 +86,7 @@ val_dataset = DatasetVal()
 
 num_train_batches = int(len(train_dataset)/train_batch_size)
 num_val_batches = int(len(val_dataset)/eval_batch_size)
+print("num_train_dataset", len(train_dataset))
 print ("num_train_batches:", num_train_batches)
 print ("num_val_batches:", num_val_batches)
 
@@ -131,7 +141,7 @@ for epoch in range(start_epoch, num_epochs):
 
     epoch_loss = np.mean(batch_losses)
     epoch_losses_train.append(epoch_loss)
-    with open("%s/epoch_losses_train.pkl" % network.model_dir, "wb") as file:
+    with open("%s/epoch_losses_train.pkl" % model_dir, "wb") as file:
         pickle.dump(epoch_losses_train, file)
     print ("train loss: %g" % epoch_loss)
     plt.figure(1)
@@ -140,7 +150,7 @@ for epoch in range(start_epoch, num_epochs):
     plt.ylabel("loss")
     plt.xlabel("epoch")
     plt.title("train loss per epoch")
-    plt.savefig("%s/epoch_losses_train.png" % network.model_dir)
+    plt.savefig("%s/epoch_losses_train.png" % model_dir)
     plt.close(1)
     print ("####")
 
@@ -187,12 +197,12 @@ for epoch in range(start_epoch, num_epochs):
                     overlayed_img = 0.35*img + 0.65*pred_label_img_color
                     overlayed_img = overlayed_img.astype(np.uint8)
 
-                    cv2.imwrite(network.model_dir + "/test.png", overlayed_img)
+                    cv2.imwrite(model_dir + "/test.png", overlayed_img)
 
 
     epoch_loss = np.mean(batch_losses)
     epoch_losses_val.append(epoch_loss)
-    with open("%s/epoch_losses_val.pkl" % network.model_dir, "wb") as file:
+    with open("%s/epoch_losses_val.pkl" % model_dir, "wb") as file:
         pickle.dump(epoch_losses_val, file)
     print ("val loss: %g" % epoch_loss)
     plt.figure(1)
@@ -201,7 +211,7 @@ for epoch in range(start_epoch, num_epochs):
     plt.ylabel("loss")
     plt.xlabel("epoch")
     plt.title("val loss per epoch")
-    plt.savefig("%s/epoch_losses_val.png" % network.model_dir)
+    plt.savefig("%s/epoch_losses_val.png" % model_dir)
     plt.close(1)
 
     # save the model weights to disk:
