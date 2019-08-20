@@ -80,31 +80,32 @@ for step, (imgs, label_imgs) in enumerate(val_loader):
     
     with torch.no_grad(): # (corresponds to setting volatile=True in all variables, this is done during inference to reduce memory consumption)
         imgs = Variable(imgs).cuda() # (shape: (batch_size, 3, img_h, img_w))
+
         #label_imgs = Variable(label_imgs.type(torch.LongTensor)).cuda() # (shape: (batch_size, img_h, img_w))
 
         outputs = network(imgs) # (shape: (batch_size, num_classes, img_h, img_w))
 
         # compute the loss:
+        #outputs = outputs.data.cpu().numpy() # (shape: (batch_size, num_classes, img_h, img_w))
+        outputs = torch.argmax(outputs, dim=1)
 
-        outputs = outputs.data.cpu().numpy() # (shape: (batch_size, num_classes, img_h, img_w))
-        pred_label_imgs = np.argmax(outputs, axis=1) # (shape: (batch_size, img_h, img_w))
+        #pred_label_imgs = np.argmax(outputs, axis=1) # (shape: (batch_size, img_h, img_w))
+        pred_label_imgs = outputs.data.cpu().numpy()
+
         pred_label_imgs = pred_label_imgs.astype(np.uint8)
 
         for i in range(pred_label_imgs.shape[0]):
             pred_label_img = pred_label_imgs[i] # (shape: (img_h, img_w))
             img = imgs[i] # (shape: (3, img_h, img_w))
-
             img = img.data.cpu().numpy()
             img = np.transpose(img, (1, 2, 0)) # (shape: (img_h, img_w, 3))
             img = img*np.array([0.229, 0.224, 0.225])
             img = img + np.array([0.485, 0.456, 0.406])
             img = img*255.0
-            img = img.astype(np.uint8)
-
+            img = img.astype(np.uint8)  
             pred_label_img_color = label_img_to_color_apolloscape(pred_label_img)
             overlayed_img = 0.35*img + 0.65*pred_label_img_color
             overlayed_img = overlayed_img.astype(np.uint8)
-
             save_file_path = os.path.join(save_path, str(img_index) + '.png')
             cv2.imwrite(save_file_path, overlayed_img)
             img_index += 1

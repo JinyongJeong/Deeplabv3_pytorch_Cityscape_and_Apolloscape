@@ -47,7 +47,7 @@ train_batch_size = 50
 eval_batch_size = 30
 learning_rate = 0.0001
 
-eval_stride = 5
+eval_stride = 1
 checkpoint_save_stride = 1
 
 network = DeepLabV3(model_id, project_dir=default_path).cuda()
