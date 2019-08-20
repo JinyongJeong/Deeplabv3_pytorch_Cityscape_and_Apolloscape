@@ -49,10 +49,17 @@ learning_rate = 0.0001
 
 eval_stride = 5
 checkpoint_save_stride = 5
+checkpoints_dir = os.path.join(default_path, 'training_logs', 'model_' + str(model_id), 'checkpoints') 
 
-network = DeepLabV3(model_id, project_dir=default_path).cuda()
+# Single GPU
+#network = DeepLabV3(model_id, project_dir=default_path).cuda()
+
+# Multi GPU
+network = DeepLabV3(model_id, project_dir=default_path)
+network = nn.DataParallel(network)
+network = network.cuda()
 #check last checkpoint
-data_list = glob.glob(os.path.join(network.checkpoints_dir,'model_'+model_id+'_*.pth'))
+data_list = glob.glob(os.path.join(checkpoints_dir,'model_'+model_id+'_*.pth'))
 
 #find latest checkpoint
 start_epoch = 0
@@ -60,7 +67,7 @@ for name in list(data_list):
     if start_epoch < int(getEpoch(name)):
         start_epoch = int(getEpoch(name))
 if start_epoch != 0:
-    network.load_state_dict(torch.load(os.path.join(network.checkpoints_dir,"model_" + model_id +"_epoch_" + str(start_epoch) + ".pth")))
+    network.load_state_dict(torch.load(os.path.join(checkpoints_dir,"model_" + model_id +"_epoch_" + str(start_epoch) + ".pth")))
     print("Recorver check point of epoch: " + str(start_epoch)) 
 
 
@@ -199,5 +206,5 @@ for epoch in range(start_epoch, num_epochs):
 
     # save the model weights to disk:
     if epoch%checkpoint_save_stride == 0:
-        checkpoint_path = network.checkpoints_dir + "/model_" + model_id +"_epoch_" + str(epoch+1) + ".pth"
+        checkpoint_path = checkpoints_dir + "/model_" + model_id +"_epoch_" + str(epoch+1) + ".pth"
         torch.save(network.state_dict(), checkpoint_path)
