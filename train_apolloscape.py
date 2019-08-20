@@ -43,15 +43,14 @@ def getEpoch(checkpoint_name):
 model_id = "2"
 
 num_epochs = 1000
-train_batch_size = 50
+train_batch_size = 100
 eval_batch_size = 30
 learning_rate = 0.0001
 
-eval_stride = 1
+eval_stride = 5
 checkpoint_save_stride = 5
 
 network = DeepLabV3(model_id, project_dir=default_path).cuda()
-
 #check last checkpoint
 data_list = glob.glob(os.path.join(network.checkpoints_dir,'model_'+model_id+'_*.pth'))
 
