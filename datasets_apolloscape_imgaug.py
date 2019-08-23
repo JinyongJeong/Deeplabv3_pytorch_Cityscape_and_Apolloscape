@@ -49,13 +49,13 @@ class DatasetTrain(torch.utils.data.Dataset):
                 iaa.CropToFixedSize(width=256, height=256, position='center'),  #set size
                 iaa.Fliplr(0.5),    #flip
                 iaa.Multiply((0.5, 1.5)),    #brightness
-                iaa.Sharpen(alpha=(0.0,0.5), lightness=(0.8, 1.2)),
+                iaa.Sharpen(alpha=(0.0,0.4), lightness=(0.8, 1.2)),
                 sometimes(iaa.OneOf([
                     iaa.AverageBlur(k=(1,3)),
                     iaa.MedianBlur(k=(1,3)),
                     iaa.GaussianBlur(sigma=(0,0.1))
                     ])),
-                sometimes(iaa.AdditiveGaussianNoise(loc=0, scale=(0.0, 0.05*255), per_channel=0.5)),
+                sometimes(iaa.AdditiveGaussianNoise(loc=0, scale=(0.0, 0.03*255), per_channel=0.5)),
                 sometimes(iaa.Grayscale((0.0, 0.8)))
                 ])
 
