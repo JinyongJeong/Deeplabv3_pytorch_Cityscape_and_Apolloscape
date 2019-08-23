@@ -42,9 +42,9 @@ class DatasetTrain(torch.utils.data.Dataset):
         ia.seed(2)
         self.seq = iaa.Sequential([
 #                iaa.CropToFixedSize(width=400, height=400, position='uniform'), #crop
-                iaa.PerspectiveTransform(scale=(0, 0.1), keep_size=True, cval=0),   #perspective
-                iaa.Affine(scale={"x": (0.8, 1.2), "y":(0.8,1.2)},  #scale, rotation
-                    rotate=(-20, 20), 
+                iaa.PerspectiveTransform(scale=(0, 0.15), keep_size=True, cval=0),   #perspective
+                iaa.Affine(scale={"x": (0.7, 1.8), "y":(0.7,1.8)},  #scale, rotation
+                    rotate=(-45, 45), 
                     cval=0),
                 iaa.CropToFixedSize(width=256, height=256, position='center'),  #set size
                 iaa.Fliplr(0.5),    #flip

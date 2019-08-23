@@ -40,7 +40,7 @@ def getEpoch(checkpoint_name):
 
 
 # NOTE! NOTE! change this to not overwrite all log data when you train the model:
-model_id = "3"
+model_id = "4"
 
 num_epochs = 1000
 train_batch_size = 150
