@@ -1,4 +1,5 @@
 training_logs/
 inference/
+test/
 *.swp
 *.pyc

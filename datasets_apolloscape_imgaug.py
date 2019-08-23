@@ -94,7 +94,7 @@ class DatasetTrain(torch.utils.data.Dataset):
         img = img[None,:]
         label_img = label_img[None,:]
         toc = time.clock()
-        print("1: " , str(toc - tic))
+        #print("1: " , str(toc - tic))
         tic = time.clock()
         
         #random crop for initial
@@ -109,7 +109,7 @@ class DatasetTrain(torch.utils.data.Dataset):
         img, label_img = self.seq(images=img, segmentation_maps=label_img)
         
         toc = time.clock()
-        print("2:", str(toc - tic))
+        #print("2:", str(toc - tic))
         tic = time.clock()
         img = img[0]
         label_img = label_img[0]
@@ -119,86 +119,12 @@ class DatasetTrain(torch.utils.data.Dataset):
         test_label_save_path = os.path.join(default_path, 'test', label_basename)
 
         toc = time.clock()
-        print("3:", str(toc - tic))
+        #print("3:", str(toc - tic))
 
-        cv2.imwrite(test_img_save_path, img)
-        cv2.imwrite(test_label_save_path, label_img)
+        #cv2.imwrite(test_img_save_path, img)
+        #cv2.imwrite(test_label_save_path, label_img)
 
-#        ########################################################################
-#        # randomly scale the img and the label:
-#        ########################################################################
-#        scale = np.random.uniform(low=0.7, high=1.5)
-#        new_img_h = int(scale*self.img_h)
-#        new_img_w = int(scale*self.img_w)
-#
-#        # resize img without interpolation (want the image to still match
-#        # label_img, which we resize below):
-#        img = cv2.resize(img, (new_img_w, new_img_h),
-#                         interpolation=cv2.INTER_NEAREST) # (shape: (new_img_h, new_img_w, 3))
-#
-#        # resize label_img without interpolation (want the resulting image to
-#        # still only contain pixel values corresponding to an object class):
-#        label_img = cv2.resize(label_img, (new_img_w, new_img_h),
-#                               interpolation=cv2.INTER_NEAREST) # (shape: (new_img_h, new_img_w))
-#        ########################################################################
-#        # # # # # # # # debug visualization START
-#        # print (scale)
-#        # print (new_img_h)
-#        # print (new_img_w)
-#        #
-#        # cv2.imshow("test", img)
-#        # cv2.waitKey(0)
-#        #
-#        # cv2.imshow("test", label_img)
-#        # cv2.waitKey(0)
-#        # # # # # # # # debug visualization END
-#        ########################################################################
-#        # select a 256x256 random crop from the img and label:
-#        ########################################################################
-#        start_x = np.random.randint(low=0, high=(new_img_w - 256))
-#        end_x = start_x + 256
-#        start_y = np.random.randint(low=0, high=(new_img_h - 256))
-#        end_y = start_y + 256
-#
-#        img = img[start_y:end_y, start_x:end_x] # (shape: (256, 256, 3))
-#        label_img = label_img[start_y:end_y, start_x:end_x] # (shape: (256, 256))
-#        ########################################################################
-#        # flip the img and the label with 0.5 probability:
-#        flip = np.random.randint(low=0, high=2)
-#        if flip == 1:
-#            img = cv2.flip(img, 1)
-#            label_img = cv2.flip(label_img, 1)
-#        
-#        # brightness augmentation
-#        factor = 0.5
-#        hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
-#        hsv = np.array(hsv, dtype=np.float64)
-#        hsv[:, :, 2] = hsv[:, :, 2] * (factor + np.random.uniform()) #scale channel V uniformly
-#        hsv[:, :, 2][hsv[:, :, 2] > 255] = 255 #reset out of range values
-#        img = cv2.cvtColor(np.array(hsv, dtype=np.uint8), cv2.COLOR_HSV2RGB)
-#        # # # # # # # # debug visualization START
-#        # print (img.shape)
-#        # print (label_img.shape)
-#        #
-#        # cv2.imshow("test", img)
-#        # cv2.waitKey(0)
-#        #
-#        # cv2.imshow("test", label_img)
-#        # cv2.waitKey(0)
-#        # # # # # # # # debug visualization END
-#
-#        # Data augmentation using imgaug
-#        #img = np.transpose(img, (2,0,1))
-#        #print("img: ")
-#        #print(img.shape)
-#        img, label_img = self.seq(image=img, segmentation_maps=label_img)
-#        #img = np.transpose(img, (2,0,1))
-#        #print("after img: ")
-#        #print(img.shape)
-#        
-#
-#
-#        # normalize the img (with the mean and std for the pretrained ResNet):
+        # normalize the img (with the mean and std for the pretrained ResNet):
         img = img/255.0
         img = img - np.array([0.485, 0.456, 0.406])
         img = img/np.array([0.229, 0.224, 0.225]) # (shape: (256, 256, 3))

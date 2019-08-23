@@ -67,7 +67,7 @@ class DatasetTrain(torch.utils.data.Dataset):
         label_img_path = example["label_img_path"]
         label_img = cv2.imread(label_img_path, -1) # (shape: (560, 1280))
        
-
+        tic = time.clock()
         ########################################################################
         # randomly scale the img and the label:
         ########################################################################
@@ -141,6 +141,9 @@ class DatasetTrain(torch.utils.data.Dataset):
         # convert numpy -> torch:
         img = torch.from_numpy(img) # (shape: (3, 256, 256))
         label_img = torch.from_numpy(label_img) # (shape: (256, 256))
+        toc = time.clock()
+        print("time: " , str(toc-tic))
+
         return (img, label_img)
 
     def __len__(self):
