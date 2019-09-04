@@ -1,7 +1,12 @@
 # camera-ready
 
+import atexit
 import sys
 import os
+import datetime
+import smtplib
+from email.mime.text import MIMEText
+
 default_path = os.path.dirname(os.path.abspath(__file__))
 
 from datasets_apolloscape_imgaug_gpu import DatasetTrain, DatasetVal # (this needs to be imported before torch, because cv2 needs to be imported before torch for some reason)
