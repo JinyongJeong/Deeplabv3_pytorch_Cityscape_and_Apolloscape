@@ -53,6 +53,31 @@ logs_dir = os.path.join(default_path, 'training_logs')
 checkpoints_dir = os.path.join(default_path, 'training_logs', 'model_' + str(model_id), 'checkpoints') 
 model_dir = os.path.join(default_path, 'training_logs', 'model_' + str(model_id)) 
 
+def exit_handler():
+    print('*'*30)
+    print("Program exit")
+    end_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    hostname = socket.gethostname()
+    ip_address = socket.gethostbyname(socket.gethostname())
+    subject = 'DeeplabV3_report_{}'.format(end_time)
+    body = 'Complete training \n Hostname {} \n IP Address {} \n model id {} \n learning rate {} \n'.format(hostname,ip_address, model_id, learning_rate)
+
+    smtp = smtplib.SMTP('smtp.gmail.com', 587)
+    smtp.ehlo()
+    smtp.starttls()
+    smtp.login('deeplabv3.jjy0923@gmail.com','bmhrbnrgipufjsci')
+
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['To'] = 'jjy0923@gmail.com'
+    smtp.sendmail('deeplabv3.jjy0923','jjy0923@gmail.com', msg.as_string())
+    smtp.quit()
+    print('*'*30)
+    
+atexit.register(exit_handler)
+
+
+
 if not os.path.exists(logs_dir):
     os.makedirs(logs_dir)
 if not os.path.exists(model_dir):
