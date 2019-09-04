@@ -35,7 +35,7 @@ import cv2
 
 import time
 import glob
-
+import socket
 def getEpoch(checkpoint_name):
     filename_w_ext = os.path.basename(checkpoint_name)
     filename, file_extension = os.path.splitext(filename_w_ext)
