@@ -41,7 +41,7 @@ class DatasetTrain(torch.utils.data.Dataset):
 
         ia.seed(2)
         self.seq = iaa.Sequential([
-#                iaa.CropToFixedSize(width=400, height=400, position='uniform'), #crop
+                iaa.CropToFixedSize(width=400, height=400, position='uniform'), #crop
                 iaa.PerspectiveTransform(scale=(0, 0.15), keep_size=True, cval=0),   #perspective
                 iaa.Affine(scale={"x": (0.7, 1.8), "y":(0.7,1.8)},  #scale, rotation
                     rotate=(-45, 45), 
@@ -98,13 +98,13 @@ class DatasetTrain(torch.utils.data.Dataset):
         tic = time.clock()
         
         #random crop for initial
-        initial_crop_size = 400
-        start_x = np.random.randint(low=0, high=(img.shape[2] - initial_crop_size))
-        end_x = start_x + initial_crop_size
-        start_y = np.random.randint(low=0, high=(img.shape[1] - initial_crop_size))
-        end_y = start_y + initial_crop_size
-        img = img[:,start_y:end_y, start_x:end_x,:] # (shape: (1, 400, 400, 3))
-        label_img = label_img[:,start_y:end_y, start_x:end_x] # (shape: (1, 400, 400))
+        #initial_crop_size = 400
+        #start_x = np.random.randint(low=0, high=(img.shape[2] - initial_crop_size))
+        #end_x = start_x + initial_crop_size
+        #start_y = np.random.randint(low=0, high=(img.shape[1] - initial_crop_size))
+        #end_y = start_y + initial_crop_size
+        #img = img[:,start_y:end_y, start_x:end_x,:] # (shape: (1, 400, 400, 3))
+        #label_img = label_img[:,start_y:end_y, start_x:end_x] # (shape: (1, 400, 400))
 
         img, label_img = self.seq(images=img, segmentation_maps=label_img)
         
