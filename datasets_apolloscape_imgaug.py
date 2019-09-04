@@ -41,10 +41,10 @@ class DatasetTrain(torch.utils.data.Dataset):
 
         ia.seed(2)
         self.seq = iaa.Sequential([
-                iaa.CropToFixedSize(width=400, height=400, position='uniform'), #crop
-                iaa.PerspectiveTransform(scale=(0, 0.15), keep_size=True, cval=0),   #perspective
-                iaa.Affine(scale={"x": (0.7, 1.8), "y":(0.7,1.8)},  #scale, rotation
-                    rotate=(-45, 45), 
+                iaa.CropToFixedSize(width=500, height=500, position='uniform'), #crop
+                iaa.PerspectiveTransform(scale=(0, 0.40), keep_size=True, cval=0),   #perspective
+                iaa.Affine(scale={"x": (0.5, 2.0), "y":(0.5,2.0)},  #scale, rotation
+                    rotate=(-180, 180), 
                     cval=0),
                 iaa.CropToFixedSize(width=256, height=256, position='center'),  #set size
                 iaa.Fliplr(0.5),    #flip
@@ -53,10 +53,10 @@ class DatasetTrain(torch.utils.data.Dataset):
                 sometimes(iaa.OneOf([
                     iaa.AverageBlur(k=(1,3)),
                     iaa.MedianBlur(k=(1,3)),
-                    iaa.GaussianBlur(sigma=(0,0.1))
+                    iaa.GaussianBlur(sigma=(0,0.2))
                     ])),
-                sometimes(iaa.AdditiveGaussianNoise(loc=0, scale=(0.0, 0.03*255), per_channel=0.5)),
-                sometimes(iaa.Grayscale((0.0, 0.8)))
+                sometimes(iaa.AdditiveGaussianNoise(loc=0, scale=(0.0, 0.05*255), per_channel=0.5)),
+                sometimes(iaa.Grayscale((0.0, 1.0)))
                 ])
 
                 
