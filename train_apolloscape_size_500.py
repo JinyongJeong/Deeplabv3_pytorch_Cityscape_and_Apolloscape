@@ -43,7 +43,7 @@ def getEpoch(checkpoint_name):
 model_id = "1"
 
 num_epochs = 300
-train_batch_size = 40
+train_batch_size = 20
 eval_batch_size = 1
 learning_rate = 0.0001
 
