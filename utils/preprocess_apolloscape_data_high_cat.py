@@ -84,9 +84,9 @@ labels = [
     Label(  'd_wy_za' , 212 ,    32 ,  'attention' ,   9 ,      False ,       True , (  0, 255, 255) ),
     Label(  'r_wy_np' , 227 ,    33 , 'no parking' ,   10 ,      False ,      False , (178, 132, 190) ),
     Label( 'vom_wy_n' , 223 ,    34 ,     'others' ,   11 ,      False ,       True , (128, 128,  64) ),
-    Label(   'om_n_n' , 250 ,    35 ,     'others' ,   12 ,      False ,      False , (102,   0, 204) ),
-    Label(    'noise' , 249 ,   255 ,    'ignored' ,   7 ,      False ,       True , (  0, 153, 153) ),
-    Label(  'ignored' , 255 ,   255 ,    'ignored' ,   7 ,      False ,       True , (255, 255, 255) ),
+    Label(   'om_n_n' , 250 ,    35 ,     'others' ,   11 ,      False ,      False , (102,   0, 204) ),
+    Label(    'noise' , 249 ,   255 ,    'ignored' ,   12 ,      False ,       True , (  0, 153, 153) ),
+    Label(  'ignored' , 255 ,   255 ,    'ignored' ,   12 ,      False ,       True , (255, 255, 255) ),
 ]
 
 # create a function which maps id to trainId:
