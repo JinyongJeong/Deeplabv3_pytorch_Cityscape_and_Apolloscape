@@ -212,7 +212,7 @@ for path in list(data_paths):
 ################################################################################
 print ("computing class weights")
 
-num_classes = 13
+num_classes = 8
 
 trainId_to_count = {}
 for trainId in range(num_classes):
