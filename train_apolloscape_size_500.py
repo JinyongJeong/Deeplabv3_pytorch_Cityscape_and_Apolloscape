@@ -44,12 +44,12 @@ def getEpoch(checkpoint_name):
 
 
 # NOTE! NOTE! change this to not overwrite all log data when you train the model:
-model_id = "1"
+model_id = "4"
 
-num_epochs = 300
+num_epochs = 50
 train_batch_size = 20
 eval_batch_size = 1
-learning_rate = 0.0001
+learning_rate = 0.0005
 
 eval_stride = 10
 checkpoint_save_stride = 5
@@ -139,11 +139,11 @@ loss_fn = nn.CrossEntropyLoss(weight=class_weights)
 
 epoch_losses_train = []
 epoch_losses_val = []
-for epoch in range(start_epoch, num_epochs):
+for epoch in range(start_epoch, num_epochs+1):
     print ("###########################")
     print ("######## NEW EPOCH ########")
     print ("###########################")
-    print ("epoch: %d/%d" % (epoch+1, num_epochs))
+    print ("epoch: %d/%d" % (epoch, num_epochs))
 
     ############################################################################
     # train:
@@ -244,5 +244,5 @@ for epoch in range(start_epoch, num_epochs):
 
     # save the model weights to disk:
     if epoch%checkpoint_save_stride == 0:
-        checkpoint_path = checkpoints_dir + "/model_" + model_id +"_epoch_" + str(epoch+1) + ".pth"
+        checkpoint_path = checkpoints_dir + "/model_" + model_id +"_epoch_" + str(epoch) + ".pth"
         torch.save(network.state_dict(), checkpoint_path)
