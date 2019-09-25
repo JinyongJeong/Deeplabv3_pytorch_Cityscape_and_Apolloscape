@@ -8,10 +8,10 @@ from email.mime.text import MIMEText
 
 default_path = os.path.dirname(os.path.abspath(__file__))
 
-from datasets_apolloscape_imgaug_size_500 import DatasetTrain, DatasetVal # (this needs to be imported before torch, because cv2 needs to be imported before torch for some reason)
+from datasets_apolloscape_imgaug_road import DatasetTrain, DatasetVal # (this needs to be imported before torch, because cv2 needs to be imported before torch for some reason)
 
 sys.path.append(os.path.join(default_path,'model'))
-from deeplabv3_apolloscape import DeepLabV3
+from deeplabv3_apolloscape_class_8 import DeepLabV3
 
 sys.path.append(os.path.join(default_path,'utils'))
 from utils import add_weight_decay
@@ -44,10 +44,10 @@ def getEpoch(checkpoint_name):
 
 
 # NOTE! NOTE! change this to not overwrite all log data when you train the model:
-model_id = "7"
+model_id = "12"
 
-num_epochs = 50
-train_batch_size = 20
+num_epochs = 500
+train_batch_size = 13
 eval_batch_size = 1
 learning_rate = 0.001
 
@@ -121,18 +121,27 @@ print ("num_val_batches:", num_val_batches)
 
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                            batch_size=train_batch_size, shuffle=True,
-                                           num_workers=30)
+                                           num_workers=30, drop_last=True)
 val_loader = torch.utils.data.DataLoader(dataset=val_dataset,
                                          batch_size=eval_batch_size, shuffle=False,
-                                         num_workers=30)
+                                         num_workers=30, drop_last=True)
 
 params = add_weight_decay(network, l2_value=0.0001)
 optimizer = torch.optim.Adam(params, lr=learning_rate)
 
-with open(os.path.join(default_path,'data/apolloscapes/class_weights.pkl'), "rb") as file: # (needed for python3)
-    class_weights = np.array(pickle.load(file))
+#with open(os.path.join(default_path,'data/apolloscapes/class_weights.pkl'), "rb") as file: # (needed for python3)
+#    class_weights = np.array(pickle.load(file))
+#class_weights = torch.from_numpy(class_weights)
+#class_weights = Variable(class_weights.type(torch.FloatTensor)).cuda()
+
+with open(os.path.join(default_path,'data/apolloscapes/class_prob.pkl'), "rb") as file: # (needed for python3)
+    class_prob = np.array(pickle.load(file))
+class_weights = 1/(0.0001 + class_prob)
+
 class_weights = torch.from_numpy(class_weights)
 class_weights = Variable(class_weights.type(torch.FloatTensor)).cuda()
+
+
 
 # loss function
 loss_fn = nn.CrossEntropyLoss(weight=class_weights)

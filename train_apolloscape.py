@@ -11,7 +11,7 @@ default_path = os.path.dirname(os.path.abspath(__file__))
 from datasets_apolloscape_imgaug import DatasetTrain, DatasetVal # (this needs to be imported before torch, because cv2 needs to be imported before torch for some reason)
 
 sys.path.append(os.path.join(default_path,'model'))
-from deeplabv3_apolloscape import DeepLabV3
+from deeplabv3_apolloscape_class_8 import DeepLabV3
 
 sys.path.append(os.path.join(default_path,'utils'))
 from utils import add_weight_decay
