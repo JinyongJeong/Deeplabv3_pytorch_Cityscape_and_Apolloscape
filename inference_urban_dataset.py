@@ -36,7 +36,7 @@ def getEpoch(checkpoint_name):
     return filenames[3]
 
 # NOTE! NOTE! change this to not overwrite all log data when you train the model:
-model_ids = [11,12]
+model_ids = [11,12,13]
 eval_batch_size = 1
 
 for model_id in model_ids:

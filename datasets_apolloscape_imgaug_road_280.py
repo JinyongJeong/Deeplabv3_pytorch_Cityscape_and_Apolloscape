@@ -36,17 +36,17 @@ class DatasetTrain(torch.utils.data.Dataset):
     def __init__(self):
 
 
-        self.img_h = 560
+        self.img_h = 280
         self.img_w = 1280
 
         ia.seed(2)
         self.seq = iaa.Sequential([
-                iaa.CropToFixedSize(width=560, height=560, position='uniform'), #crop
+                iaa.CropToFixedSize(width=280, height=280, position='uniform'), #crop
                 iaa.PerspectiveTransform(scale=(0, 0.40), keep_size=True, cval=0),   #perspective
-                iaa.Affine(scale={"x": (0.5, 2.0), "y":(0.5,2.0)},  #scale, rotation
+                iaa.Affine(scale={"x": (0.5, 2.0), "y":(0.8,2.0)},  #scale, rotation
                     rotate=(-180, 180), 
                     cval=0),
-                iaa.CropToFixedSize(width=500, height=500, position='center'),  #set size
+                #iaa.CropToFixedSize(width=256, height=256, position='center'),  #set size
                 iaa.Fliplr(0.5),    #flip
                 iaa.Multiply((0.5, 1.5)),    #brightness
                 iaa.Sharpen(alpha=(0.0,0.4), lightness=(0.8, 1.2)),
@@ -59,7 +59,6 @@ class DatasetTrain(torch.utils.data.Dataset):
                 sometimes(iaa.Grayscale((0.0, 1.0)))
                 ])
 
-                
 
 
         self.examples = []
@@ -142,7 +141,7 @@ class DatasetTrain(torch.utils.data.Dataset):
 class DatasetVal(torch.utils.data.Dataset):
     def __init__(self):
 
-        self.img_h = 560
+        self.img_h = 280
         self.img_w = 1280
 
         self.examples = []
