@@ -10,7 +10,7 @@ import pickle
 import glob
 import time
 default_path = os.path.dirname(os.path.abspath(__file__))
-apolloscape_data_path = os.path.join(default_path,'data/apolloscapes')
+apolloscape_data_path = os.path.join('/data/urban_dataset/urban39-pankyo/image/')
 train_data_path_file = os.path.join(apolloscape_data_path,'train_data_path.pkl')
 eval_data_path_file = os.path.join(apolloscape_data_path,'eval_data_path.pkl')
 train_data_path = []
@@ -36,7 +36,7 @@ class DatasetTrain(torch.utils.data.Dataset):
     def __init__(self):
 
 
-        self.img_h = 280
+        self.img_h = 320
         self.img_w = 1280
 
         ia.seed(2)
@@ -62,24 +62,32 @@ class DatasetTrain(torch.utils.data.Dataset):
 
 
         self.examples = []
-        for train_dir in train_data_path:
-
-            file_dir = os.path.join(train_dir,"*.png")
-            file_list = glob.glob(file_dir)
-
-            for file_path in file_list:
-                img_path = file_path.replace('Labels_', 'ColorImage_resize_')
-                img_path = img_path.replace('Label','ColorImage')
-                img_path = img_path.replace('_bin.png','.jpg')
-                label_path = file_path.replace('Labels_', 'Trainid_')
-                
-                if os.path.exists(img_path) and os.path.exists(label_path):
-                    example = {}
-                    example["img_path"] = img_path
-                    example["label_img_path"] = label_path
-                    self.examples.append(example)
-
+        for train_label_dir in train_data_path:
+            label_path = train_label_dir
+            color_path = train_label_dir.replace('resize_stereo_left_trainID', 'resize_stereo_left_color')
+            if os.path.exists(label_path) and os.path.exists(color_path):
+                example = {}
+                example["img_path"] = color_path
+                example["label_img_path"] = label_path
+                self.examples.append(example)
+        
         self.num_examples = len(self.examples)
+#            file_dir = os.path.join(train_dir,"*.png")
+#            file_list = glob.glob(file_dir)
+#
+#            for file_path in file_list:
+#                img_path = file_path.replace('Labels_', 'ColorImage_resize_')
+#                img_path = img_path.replace('Label','ColorImage')
+#                img_path = img_path.replace('_bin.png','.jpg')
+#                label_path = file_path.replace('Labels_', 'Trainid_')
+#                
+#                if os.path.exists(img_path) and os.path.exists(label_path):
+#                    example = {}
+#                    example["img_path"] = img_path
+#                    example["label_img_path"] = label_path
+#                    self.examples.append(example)
+#
+#        self.num_examples = len(self.examples)
 
     def __getitem__(self, index):
         example = self.examples[index]
@@ -141,27 +149,40 @@ class DatasetTrain(torch.utils.data.Dataset):
 class DatasetVal(torch.utils.data.Dataset):
     def __init__(self):
 
-        self.img_h = 280
+        self.img_h = 320
         self.img_w = 1280
 
+
         self.examples = []
-        for eval_dir in eval_data_path:
-
-            file_dir = os.path.join(eval_dir,"*.png")
-            file_list = sorted(glob.glob(file_dir))
-
-            for file_path in file_list:
-                img_path = file_path.replace('Labels_', 'ColorImage_resize_')
-                img_path = img_path.replace('Label','ColorImage')
-                img_path = img_path.replace('_bin.png','.jpg')
-                label_path = file_path.replace('Labels_', 'Trainid_')
-                if os.path.exists(img_path) and os.path.exists(label_path):
-                    example = {}
-                    example["img_path"] = img_path
-                    example["label_img_path"] = label_path
-                    self.examples.append(example)
-
+        for eval_label_dir in eval_data_path:
+            label_path = eval_label_dir
+            color_path = eval_label_dir.replace('resize_stereo_left_trainID', 'resize_stereo_left_color')
+            if os.path.exists(label_path) and os.path.exists(color_path):
+                example = {}
+                example["img_path"] = color_path
+                example["label_img_path"] = label_path
+                self.examples.append(example)
+        
         self.num_examples = len(self.examples)
+#
+#        self.examples = []
+#        for eval_dir in eval_data_path:
+#
+#            file_dir = os.path.join(eval_dir,"*.png")
+#            file_list = sorted(glob.glob(file_dir))
+#
+#            for file_path in file_list:
+#                img_path = file_path.replace('Labels_', 'ColorImage_resize_')
+#                img_path = img_path.replace('Label','ColorImage')
+#                img_path = img_path.replace('_bin.png','.jpg')
+#                label_path = file_path.replace('Labels_', 'Trainid_')
+#                if os.path.exists(img_path) and os.path.exists(label_path):
+#                    example = {}
+#                    example["img_path"] = img_path
+#                    example["label_img_path"] = label_path
+#                    self.examples.append(example)
+#
+#        self.num_examples = len(self.examples)
 
     def __getitem__(self, index):
         example = self.examples[index]

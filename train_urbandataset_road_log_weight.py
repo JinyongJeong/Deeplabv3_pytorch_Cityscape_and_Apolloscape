@@ -44,15 +44,15 @@ def getEpoch(checkpoint_name):
 
 
 # NOTE! NOTE! change this to not overwrite all log data when you train the model:
-model_id = "12"
+model_id = "11"
 
-num_epochs = 500
+num_epochs = 5000
 train_batch_size = 13
 eval_batch_size = 1
 learning_rate = 0.001
 
-eval_stride = 10
-checkpoint_save_stride = 5
+eval_stride = 1
+checkpoint_save_stride = 100
 logs_dir = os.path.join(default_path, 'training_logs')
 checkpoints_dir = os.path.join(default_path, 'training_logs', 'model_' + str(model_id), 'checkpoints') 
 model_dir = os.path.join(default_path, 'training_logs', 'model_' + str(model_id)) 
@@ -136,7 +136,7 @@ optimizer = torch.optim.Adam(params, lr=learning_rate)
 
 with open(os.path.join(default_path,'data/apolloscapes/class_prob.pkl'), "rb") as file: # (needed for python3)
     class_prob = np.array(pickle.load(file))
-class_weights = 1/(0.0001 + class_prob)
+class_weights = 1/np.log(1.02 + class_prob)
 
 class_weights = torch.from_numpy(class_weights)
 class_weights = Variable(class_weights.type(torch.FloatTensor)).cuda()
