@@ -8,7 +8,7 @@ from email.mime.text import MIMEText
 
 default_path = os.path.dirname(os.path.abspath(__file__))
 
-from datasets_urbandataset_imgaug_road import DatasetTrain, DatasetVal # (this needs to be imported before torch, because cv2 needs to be imported before torch for some reason)
+from datasets_urbandataset_imgaug_road_280 import DatasetTrain, DatasetVal # (this needs to be imported before torch, because cv2 needs to be imported before torch for some reason)
 
 sys.path.append(os.path.join(default_path,'model'))
 from deeplabv3_apolloscape_class_8 import DeepLabV3
@@ -44,10 +44,10 @@ def getEpoch(checkpoint_name):
 
 
 # NOTE! NOTE! change this to not overwrite all log data when you train the model:
-model_id = "21"
+model_id = "20"
 
 num_epochs = 5000
-train_batch_size = 13
+train_batch_size = 30
 eval_batch_size = 1
 learning_rate = 0.001
 
