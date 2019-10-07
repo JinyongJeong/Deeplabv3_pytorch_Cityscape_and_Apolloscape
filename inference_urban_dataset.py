@@ -36,7 +36,7 @@ def getEpoch(checkpoint_name):
     return filenames[3]
 
 # NOTE! NOTE! change this to not overwrite all log data when you train the model:
-model_ids = [11,12]
+model_ids = [14]
 eval_batch_size = 1
 
 for model_id in model_ids:
@@ -88,7 +88,7 @@ for model_id in model_ids:
         with torch.no_grad():
             img_raw = cv2.imread(img_path, -1)
             img_raw = cv2.cvtColor(img_raw, cv2.COLOR_BAYER_BG2RGB)
-            img_raw = img_raw[200:560,:]
+            img_raw = img_raw[240:560,:]
             #cv2.imwrite( os.path.join(save_path, str(img_index) + '.png'), img_raw)
             #img_index += 1
             #continue
