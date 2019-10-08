@@ -45,7 +45,7 @@ with open(urbandataset_train_data_path_file, 'rb') as f:
         except EOFError:
             break
         train_urban_data_path.append(data)
-with open(eval_data_path_file, 'rb') as f:
+with open(urbandataset_eval_data_path_file, 'rb') as f:
      while True:
         try:
             data = pickle.load(f)
