@@ -131,3 +131,7 @@ with open(os.path.join(source_img_path, './../') + "/class_prob.pkl", "wb") as f
     pickle.dump(class_prob, file, protocol=2) # (protocol=2 is needed to be able to open this file with python2)
 
 
+with open(os.path.join(source_img_path, './../') + "/pixel_count.pkl", "wb") as file:
+    pickle.dump(trainid_to_count, file, protocol=2) # (protocol=2 is needed to be able to open this file with python2)
+
+

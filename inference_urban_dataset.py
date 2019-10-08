@@ -36,7 +36,7 @@ def getEpoch(checkpoint_name):
     return filenames[3]
 
 # NOTE! NOTE! change this to not overwrite all log data when you train the model:
-model_ids = [14]
+model_ids = [20,21]
 eval_batch_size = 1
 
 for model_id in model_ids:
@@ -74,7 +74,8 @@ for model_id in model_ids:
         os.makedirs(save_path)
     
     # get data list
-    source_img_path = '/data/urban_dataset/urban39-pankyo/image/stereo_left'
+#    source_img_path = '/data/urban_dataset/urban39-pankyo/image/stereo_left'
+    source_img_path = '/data/urban_dataset/urban28-pankyo/image/stereo_left'
     img_list = sorted(glob.glob(os.path.join(source_img_path, '*.png')))
     
     print(len(img_list))
@@ -82,7 +83,7 @@ for model_id in model_ids:
     
     img_index = 0
     for img_path in img_list:
-        if img_index > 5000:
+        if img_index > 2000:
             break
         print("inference image: " , str(img_index) , "/" , str(len(img_list)))
         with torch.no_grad():
