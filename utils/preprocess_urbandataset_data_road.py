@@ -69,6 +69,12 @@ for image in list(source_label):
             continue
         color_img = color_img[max(0,new_img_center_h - round(new_img_roi_h/2)):min(origin_img_h-1,new_img_center_h + round(new_img_roi_h/2)), max(0,new_img_center_w - round(new_img_roi_w/2)):min(origin_img_w-1,new_img_center_w + round(new_img_roi_w/2))]
         label_img = label_img[max(0,new_img_center_h - round(new_img_roi_h/2)):min(origin_img_h-1,new_img_center_h + round(new_img_roi_h/2)), max(0,new_img_center_w - round(new_img_roi_w/2)):min(origin_img_w-1,new_img_center_w + round(new_img_roi_w/2))]
+        color_img = cv2.resize(color_img, (new_img_w, new_img_h),
+                interpolation=cv2.INTER_NEAREST) 
+        label_img = cv2.resize(label_img, (new_img_w, new_img_h),
+                interpolation=cv2.INTER_NEAREST) 
+
+
 
         cv2.imwrite(os.path.join(crop_left_color_path, save_filename), color_img)
         cv2.imwrite(os.path.join(crop_left_label_path, save_filename), label_img)
