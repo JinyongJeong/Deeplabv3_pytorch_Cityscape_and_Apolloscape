@@ -98,7 +98,7 @@ with open(os.path.join(source_img_path, './../') + "/eval_data_path.pkl","wb") a
 ################################################################################
 print ("computing class weights")
 
-num_classes = 8
+num_classes = 5
 
 trainid_to_count = {}
 for trainid in range(num_classes):

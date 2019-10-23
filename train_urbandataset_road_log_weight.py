@@ -11,7 +11,7 @@ default_path = os.path.dirname(os.path.abspath(__file__))
 from datasets_urbandataset_imgaug_road import DatasetTrain, DatasetVal # (this needs to be imported before torch, because cv2 needs to be imported before torch for some reason)
 
 sys.path.append(os.path.join(default_path,'model'))
-from deeplabv3_apolloscape_class_8 import DeepLabV3
+from deeplabv3_apolloscape_class_5 import DeepLabV3
 
 sys.path.append(os.path.join(default_path,'utils'))
 from utils import add_weight_decay
@@ -44,12 +44,12 @@ def getEpoch(checkpoint_name):
 
 
 # NOTE! NOTE! change this to not overwrite all log data when you train the model:
-model_id = "21"
+model_id = "23"
 
-num_epochs = 5000
+num_epochs = 50000
 train_batch_size = 13
 eval_batch_size = 1
-learning_rate = 0.001
+learning_rate = 0.0001
 
 eval_stride = 1
 checkpoint_save_stride = 100
@@ -133,10 +133,10 @@ optimizer = torch.optim.Adam(params, lr=learning_rate)
 #    class_weights = np.array(pickle.load(file))
 #class_weights = torch.from_numpy(class_weights)
 #class_weights = Variable(class_weights.type(torch.FloatTensor)).cuda()
-
-with open(os.path.join(default_path,'data/apolloscapes/class_prob.pkl'), "rb") as file: # (needed for python3)
+with open('/data/urban_dataset/urban39-pankyo/image/class_prob.pkl', "rb") as file: # (needed for python3)
     class_prob = np.array(pickle.load(file))
 class_weights = 1/np.log(1.02 + class_prob)
+print("class num: " , str(len(class_prob)))
 
 class_weights = torch.from_numpy(class_weights)
 class_weights = Variable(class_weights.type(torch.FloatTensor)).cuda()

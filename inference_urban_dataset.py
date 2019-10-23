@@ -1,11 +1,10 @@
 # camera-ready
-
 import sys
 import os
 default_path = os.path.dirname(os.path.abspath(__file__))
 
 sys.path.append(os.path.join(default_path,'model'))
-from deeplabv3_apolloscape_class_8 import DeepLabV3
+from deeplabv3_apolloscape_class_5 import DeepLabV3
 
 sys.path.append(os.path.join(default_path,'utils'))
 from utils import add_weight_decay
@@ -36,7 +35,7 @@ def getEpoch(checkpoint_name):
     return filenames[3]
 
 # NOTE! NOTE! change this to not overwrite all log data when you train the model:
-model_ids = [20,21]
+model_ids = [23]
 eval_batch_size = 1
 
 for model_id in model_ids:
@@ -74,8 +73,8 @@ for model_id in model_ids:
         os.makedirs(save_path)
     
     # get data list
-#    source_img_path = '/data/urban_dataset/urban39-pankyo/image/stereo_left'
-    source_img_path = '/data/urban_dataset/urban28-pankyo/image/stereo_left'
+    source_img_path = '/data/urban_dataset/urban39-pankyo/image/stereo_left'
+#    source_img_path = '/data/urban_dataset/urban28-pankyo/image/stereo_left'
     img_list = sorted(glob.glob(os.path.join(source_img_path, '*.png')))
     
     print(len(img_list))
@@ -83,8 +82,8 @@ for model_id in model_ids:
     
     img_index = 0
     for img_path in img_list:
-        if img_index > 2000:
-            break
+        #if img_index > 2000:
+        #    break
         print("inference image: " , str(img_index) , "/" , str(len(img_list)))
         with torch.no_grad():
             img_raw = cv2.imread(img_path, -1)
