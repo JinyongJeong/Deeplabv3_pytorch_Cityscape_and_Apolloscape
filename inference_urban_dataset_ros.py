@@ -45,6 +45,7 @@ eval_batch_size = 1
 
 #ros setting
 pub = rospy.Publisher('/stereo/left/sementic', Image, queue_size=10)
+pub_over = rospy.Publisher('/stereo/left/sementic_overlay', Image, queue_size=10)
 #rospy.Subscriber("chatter",String,callback)
 rospy.init_node('sematic_classifier', anonymous=True)
 
@@ -81,6 +82,7 @@ def callback(data):
 
     #Start inferance
     img_raw = cv_img[240:560,:]
+    img_for_overlay = img_raw
     img_raw = img_raw/255.0
     img_raw = img_raw - np.array([0.485, 0.456, 0.406])
     img_raw = img_raw/np.array([0.229, 0.224, 0.225]) # (shape: (560, 1280, 3))
@@ -105,13 +107,21 @@ def callback(data):
    
     pred_label_imgs = pred_label_imgs.astype(np.uint8)
     pred_label_img_color = label_img_to_color_apolloscape(pred_label_imgs[0])
-    overlayed_img = pred_label_img_color
+    overlayed_img = 0.35*img_for_overlay  + 0.65 * pred_label_img_color
     overlayed_img = overlayed_img.astype(np.uint8)
+    pred_label_img_color = pred_label_img_color.astype(np.uint8)
     try:
-	    pub_img = bridge.cv2_to_imgmsg(overlayed_img, "bgr8")
+	    pub_img = bridge.cv2_to_imgmsg(pred_label_img_color,"bgr8")
     except CvBridgeError as e:
 	    print(e)
+
+    try:
+        pub_img_overlay = bridge.cv2_to_imgmsg(overlayed_img,"bgr8")
+    except CvBridgeError as e:
+	    print(e)
+
     pub.publish(pub_img)
+    pub_over.publish(pub_img_overlay)
 
 def listener():
     rospy.loginfo("Listener started")
