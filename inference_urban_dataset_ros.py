@@ -2,6 +2,8 @@
 import rospy
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
+from cv_bridge import CvBridge, CvBridgeError
+#from cv_bridge.boost.cv_bridge_boost import getCvType
 import sys
 import os
 default_path = os.path.dirname(os.path.abspath(__file__))
@@ -67,12 +69,49 @@ else:
     print("Can't find checkpoint for loading")
     quit()
 network.eval() # (set in evaluation mode, this affects BatchNorm and dropout)
-    
+
+bridge = CvBridge()
+
 def callback(data):
     rospy.loginfo(rospy.get_caller_id() + "image received")
-    #Start inferance
+    try:
+        cv_img = bridge.imgmsg_to_cv2(data, "bgr8")
+    except CvBridgeError as e:
+        print(e)
 
-    pub.publish(data)
+    #Start inferance
+    img_raw = cv_img[240:560,:]
+    img_raw = img_raw/255.0
+    img_raw = img_raw - np.array([0.485, 0.456, 0.406])
+    img_raw = img_raw/np.array([0.229, 0.224, 0.225]) # (shape: (560, 1280, 3))
+    img_raw = np.transpose(img_raw, (2, 0, 1)) # (shape: (3, 560, 1280))
+    img_raw = img_raw.astype(np.float32)
+    # convert numpy -> torch:
+    img_raw = torch.from_numpy(img_raw) # (shape: (3, 560, 1280))
+    img_raw = img_raw[None, :]
+   
+    imgs = Variable(img_raw).cuda()
+    #imgs = imgs[None, :,:,:]
+    imgs = imgs.float()
+    #imgs = imgs.transpose(2,1,0)
+    outputs = network(imgs) # (shape: (batch_size, num_classes, img_h, img_w))
+   
+    # compute the loss:
+    #outputs = outputs.data.cpu().numpy() # (shape: (batch_size, num_classes, img_h, img_w))
+    outputs = torch.argmax(outputs, dim=1)
+    
+    #pred_label_imgs = np.argmax(outputs, axis=1) # (shape: (batch_size, img_h, img_w))
+    pred_label_imgs = outputs.data.cpu().numpy()
+   
+    pred_label_imgs = pred_label_imgs.astype(np.uint8)
+    pred_label_img_color = label_img_to_color_apolloscape(pred_label_imgs[0])
+    overlayed_img = pred_label_img_color
+    overlayed_img = overlayed_img.astype(np.uint8)
+    try:
+	    pub_img = bridge.cv2_to_imgmsg(overlayed_img, "bgr8")
+    except CvBridgeError as e:
+	    print(e)
+    pub.publish(pub_img)
 
 def listener():
     rospy.loginfo("Listener started")
