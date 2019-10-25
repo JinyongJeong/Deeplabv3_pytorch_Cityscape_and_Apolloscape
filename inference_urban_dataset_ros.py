@@ -126,6 +126,8 @@ def callback(data):
 def listener():
     rospy.loginfo("Listener started")
     rospy.Subscriber("/stereo/left/image_color", Image, callback)
+    #rospy.Subscriber("/stereo/left/image_rect", Image, callback)
+    
     rospy.spin()
 
 if __name__ == '__main__':
