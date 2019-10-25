@@ -119,7 +119,8 @@ def callback(data):
         pub_img_overlay = bridge.cv2_to_imgmsg(overlayed_img,"bgr8")
     except CvBridgeError as e:
 	    print(e)
-
+    pub_img.header = data.header
+    pub_img_overlay.header = data.header
     pub.publish(pub_img)
     pub_over.publish(pub_img_overlay)
 
