@@ -1,7 +1,4 @@
-## This repo is not complete for Apolloscape dataset
-
-# Fix mirror issue
-
+## This repo is road segmentation for HD-map based localization
 
 ## Original repo: https://github.com/fregu856/deeplabv3
 
