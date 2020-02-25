@@ -1,4 +1,3 @@
-training_logs/
 inference/
 test/
 *.swp
